@@ -1,0 +1,41 @@
+/users/me:
+  get:
+    tags:
+      - users
+    summary: Получить свой профиль
+    description: Возвращает информацию о текущем пользователе
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Данные профиля
+      '401':
+        description: Не авторизован
+      '500':
+        description: Ошибка сервера
+
+  patch:
+    tags:
+      - users
+    summary: Обновить свой профиль
+    description: Обновляет email или телефон пользователя
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              phone:
+                type: string
+              email:
+                type: string
+    responses:
+      '200':
+        description: Профиль обновлен
+      '400':
+        description: Ошибка данных
+      '500':
+        description: Ошибка сервера

@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: Kyzmet API
+  version: 1.0.0
+  description: Полная документация, собранная из модулей
+servers:
+  - url: http://localhost:6969/api
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+paths: {}

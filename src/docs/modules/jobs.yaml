@@ -1,0 +1,133 @@
+/jobs:
+  get:
+    tags:
+      - jobs
+    summary: Получить список заданий
+    description: Возвращает все активные задания (JobPost)
+    responses:
+      '200':
+        description: Список заданий
+      '500':
+        description: Ошибка сервера
+
+  post:
+    tags:
+      - jobs
+    summary: Создать задание
+    description: Создает новое задание
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              category:
+                type: string
+              location:
+                type: string
+            required:
+              - title
+              - description
+              - category
+    responses:
+      '201':
+        description: Задание создано
+      '400':
+        description: Ошибка данных
+      '500':
+        description: Ошибка сервера
+
+/jobs/{id}/apply:
+  post:
+    tags:
+      - jobs
+    summary: Отклик на задание
+    description: Авторизованный пользователь откликается на задание
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+    responses:
+      '200':
+        description: Отклик отправлен
+      '400':
+        description: Ошибка запроса
+      '500':
+        description: Ошибка сервера
+
+/jobs/{id}/promote:
+  post:
+    tags:
+      - jobs
+    summary: Поднять задание в топ
+    description: Платное продвижение задания на 3 или 7 дней
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              days:
+                type: integer
+            required:
+              - days
+    responses:
+      '200':
+        description: Задание продвинуто
+      '400':
+        description: Ошибка данных
+      '500':
+        description: Ошибка сервера
+
+/jobs/{id}/contact:
+  post:
+    tags:
+      - jobs
+    summary: Купить контакт нанимателя
+    description: Открывает контактную информацию нанимателя за монеты
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Контакт получен
+      '400':
+        description: Ошибка
+      '500':
+        description: Ошибка сервера

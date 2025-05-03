@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Phone Auth</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <h2>Вход по номеру</h2>
+  <input type="text" id="phone" placeholder="+7 777 777 7777"><br>
+  <div id="recaptcha-container"></div>
+  <button onclick="sendCode()">Получить код</button>
+
+  <input type="text" id="code" placeholder="Код из СМС"><br>
+  <button onclick="verifyCode()">Войти</button>
+
+  <pre id="token"></pre>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzgb0ZblKtwXiEyXo5eEs5aypVvSFKG30",
+      authDomain: "kyzmet-d8a48.firebaseapp.com",
+      projectId: "kyzmet-d8a48",
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    let confirmationResult;
+
+    function sendCode() {
+      const phone = document.getElementById("phone").value;
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptcha-container", {
+        size: "normal"
+      });
+      firebase.auth().signInWithPhoneNumber(phone, window.recaptchaVerifier)
+        .then(result => {
+          confirmationResult = result;
+          alert("Код отправлен!");
+        })
+        .catch(error => {
+          alert("Ошибка: " + error.message);
+        });
+    }
+
+    function verifyCode() {
+      const code = document.getElementById("code").value;
+      confirmationResult.confirm(code)
+        .then(result => result.user.getIdToken())
+        .then(token => {
+          document.getElementById("token").innerText = token;
+          console.log("✅ ID Token:", token);
+        })
+        .catch(error => {
+          alert("Ошибка входа: " + error.message);
+        });
+    }
+  </script>
+</body>
+</html>

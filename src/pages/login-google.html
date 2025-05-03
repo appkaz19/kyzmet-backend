@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Login</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <h2>Вход через Google</h2>
+  <button onclick="signIn()">Войти с Google</button>
+  <pre id="token"></pre>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzgb0ZblKtwXiEyXo5eEs5aypVvSFKG30",
+      authDomain: "kyzmet-d8a48.firebaseapp.com",
+      projectId: "kyzmet-d8a48",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    function signIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(result => result.user.getIdToken())
+        .then(token => {
+          document.getElementById("token").innerText = token;
+          console.log("✅ Google ID Token:", token);
+        })
+        .catch(error => {
+          alert("Ошибка входа: " + error.message);
+        });
+    }
+  </script>
+</body>
+</html>

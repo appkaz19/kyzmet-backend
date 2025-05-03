@@ -1,0 +1,50 @@
+/reviews:
+  post:
+    tags:
+      - reviews
+    summary: Оставить отзыв на услугу
+    description: Клиент оставляет отзыв на услугу
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              serviceId:
+                type: string
+              rating:
+                type: integer
+              comment:
+                type: string
+            required:
+              - serviceId
+              - rating
+    responses:
+      '200':
+        description: Отзыв успешно оставлен
+      '400':
+        description: Ошибка запроса
+      '500':
+        description: Ошибка сервера
+
+  get:
+    tags:
+      - reviews
+    summary: Получить отзывы по услуге
+    description: Возвращает список отзывов для конкретной услуги
+    parameters:
+      - name: serviceId
+        in: query
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Список отзывов
+      '400':
+        description: Ошибка запроса
+      '500':
+        description: Ошибка сервера

@@ -1,0 +1,34 @@
+/notifications:
+  get:
+    tags:
+      - notifications
+    summary: Получить список уведомлений
+    description: Возвращает список всех уведомлений текущего пользователя
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Список уведомлений
+      '500':
+        description: Ошибка при получении уведомлений
+
+/notifications/{id}/read:
+  patch:
+    tags:
+      - notifications
+    summary: Пометить уведомление как прочитанное
+    description: Отмечает конкретное уведомление как прочитанное по ID
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID уведомления
+    responses:
+      '200':
+        description: Уведомление помечено как прочитанное
+      '500':
+        description: Ошибка при обновлении уведомления

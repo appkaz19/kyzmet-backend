@@ -1,0 +1,42 @@
+/wallet:
+  get:
+    tags:
+      - wallet
+    summary: Получить свой кошелек
+    description: Возвращает текущий баланс пользователя и историю транзакций
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Баланс и транзакции
+      '401':
+        description: Не авторизован
+      '500':
+        description: Ошибка сервера
+
+/wallet/top-up:
+  post:
+    tags:
+      - wallet
+    summary: Пополнить кошелек (заглушка)
+    description: Пополняет баланс монет через тестовый метод
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              amount:
+                type: number
+            required:
+              - amount
+    responses:
+      '200':
+        description: Баланс пополнен
+      '400':
+        description: Ошибка данных
+      '500':
+        description: Ошибка сервера

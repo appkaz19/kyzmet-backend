@@ -1,0 +1,101 @@
+/services:
+  post:
+    tags:
+      - services
+    summary: Создать услугу
+    description: Создает новую услугу
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+              images:
+                type: array
+                items:
+                  type: string
+              videos:
+                type: array
+                items:
+                  type: string
+              locationId:
+                type: string
+              categoryId:
+                type: string
+            required:
+              - title
+              - description
+              - price
+              - locationId
+              - categoryId
+    responses:
+      '201':
+        description: Услуга создана
+      '400':
+        description: Ошибка данных
+      '500':
+        description: Ошибка сервера
+
+/services/{id}/promote:
+  post:
+    tags:
+      - services
+    summary: Поднять услугу в топ
+    description: Платное продвижение услуги на 3 или 7 дней
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              days:
+                type: integer
+            required:
+              - days
+    responses:
+      '200':
+        description: Услуга продвинута
+      '400':
+        description: Ошибка данных
+      '500':
+        description: Ошибка сервера
+
+/services/{id}/contact:
+  post:
+    tags:
+      - services
+    summary: Купить контакт провайдера
+    description: Открывает контактную информацию провайдера за монеты
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Контакт получен
+      '400':
+        description: Ошибка
+      '500':
+        description: Ошибка сервера

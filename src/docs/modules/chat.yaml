@@ -1,0 +1,96 @@
+/chats/start:
+  post:
+    tags:
+      - chats
+    summary: Начать чат
+    description: Начинает новый чат с другим пользователем
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              targetUserId:
+                type: string
+            required:
+              - targetUserId
+    responses:
+      '200':
+        description: Чат создан или найден
+      '400':
+        description: Ошибка запроса
+      '500':
+        description: Ошибка сервера
+
+/chats:
+  get:
+    tags:
+      - chats
+    summary: Получить список чатов
+    description: Возвращает список всех чатов пользователя
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Список чатов
+      '401':
+        description: Не авторизован
+      '500':
+        description: Ошибка сервера
+
+/chats/{chatId}/messages:
+  get:
+    tags:
+      - chats
+    summary: Получить сообщения чата
+    description: Возвращает все сообщения внутри выбранного чата
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: chatId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Сообщения чата
+      '400':
+        description: Ошибка запроса
+      '500':
+        description: Ошибка сервера
+
+  post:
+    tags:
+      - chats
+    summary: Отправить сообщение в чат
+    description: Отправляет новое сообщение в чат
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: chatId
+        in: path
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: string
+            required:
+              - content
+    responses:
+      '200':
+        description: Сообщение отправлено
+      '400':
+        description: Ошибка отправки
+      '500':
+        description: Ошибка сервера

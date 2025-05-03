@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  backend:
+    build: .
+    container_name: node-backend
+    ports:
+      - "6969:6969"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://naimi:naimi@postgres:5432/naimi
+      SHADOW_DATABASE_URL: postgresql://naimi:naimi@postgres:5432/naimi_shadow
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/node_modules/.prisma
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_PASSWORD: dummy # просто нужен для старта Postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

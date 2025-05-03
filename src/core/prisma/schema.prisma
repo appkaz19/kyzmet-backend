@@ -1,0 +1,178 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  phone        String?  @unique
+  email        String?  @unique
+  passwordHash String?
+  googleId     String?  @unique
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  jobPosts      JobPost[]
+  applications  JobApplication[]
+  notifications Notification[]
+  wallet        Wallet?
+
+  services     Service[]
+  chatsAsUserA Chat[]        @relation("UserAChats")
+  chatsAsUserB Chat[]        @relation("UserBChats")
+  chatMessages ChatMessage[]
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  userAId   String
+  userBId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  userA    User          @relation("UserAChats", fields: [userAId], references: [id])
+  userB    User          @relation("UserBChats", fields: [userBId], references: [id])
+  messages ChatMessage[]
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  chat   Chat @relation(fields: [chatId], references: [id])
+  sender User @relation(fields: [senderId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Location {
+  id   String @id @default(cuid())
+  name String @unique
+  lat  Float
+  lng  Float
+
+  services Service[]
+}
+
+model Service {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  promotedUntil DateTime?
+
+  images String[] // Массив URL картинок
+  videos String[] // Массив URL видео
+
+  userId     String
+  locationId String
+  categoryId String
+
+  user     User     @relation(fields: [userId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  reviews Review[]
+}
+
+model Category {
+  id    String   @id @default(cuid())
+  name  String   @unique
+
+  services Service[]
+}
+
+model Wallet {
+  id      String @id @default(cuid())
+  balance Float  @default(0.0)
+  userId  String @unique
+
+  user User @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id        String          @id @default(cuid())
+  amount    Float
+  type      TransactionType
+  createdAt DateTime        @default(now())
+  walletId  String
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+}
+
+enum TransactionType {
+  TOP_UP
+  SPEND
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  serviceId String
+
+  service Service @relation(fields: [serviceId], references: [id])
+}
+
+model JobPost {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String
+  location    String
+  createdAt   DateTime @default(now())
+  promotedUntil DateTime?
+
+  images String[] // Массив URL картинок
+  videos String[] // Массив URL видео
+
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  applications JobApplication[]
+}
+
+model JobApplication {
+  id        String            @id @default(cuid())
+  message   String
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+
+  userId    String
+  jobPostId String
+
+  user    User    @relation(fields: [userId], references: [id])
+  jobPost JobPost @relation(fields: [jobPostId], references: [id])
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String // например: booking, system, review
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
