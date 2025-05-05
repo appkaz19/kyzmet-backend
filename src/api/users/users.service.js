@@ -21,7 +21,7 @@ export async function getUserById(id) {
 }
 
 export async function updateUser(id, data) {
-  const allowedFields = ['email', 'phone']; // Разрешаем менять только email и телефон
+  const allowedFields = ['email', 'phone', 'fullName', 'nickname', 'birthdate', 'locationId', 'avatarUrl'];
   const updateData = {};
 
   for (const field of allowedFields) {

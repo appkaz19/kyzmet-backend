@@ -18,11 +18,18 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  fullName   String?
+  nickname   String?
+  birthdate  String?
+  avatarUrl  String?
+  locationId String?
+
   jobPosts      JobPost[]
   applications  JobApplication[]
   notifications Notification[]
   wallet        Wallet?
 
+  location     Location?     @relation("UserLocation", fields: [locationId], references: [id])
   services     Service[]
   chatsAsUserA Chat[]        @relation("UserAChats")
   chatsAsUserB Chat[]        @relation("UserBChats")
@@ -64,13 +71,14 @@ model Location {
   lng  Float
 
   services Service[]
+  users    User[]    @relation("UserLocation")
 }
 
 model Service {
-  id          String @id @default(cuid())
-  title       String
-  description String
-  price       Float
+  id            String    @id @default(cuid())
+  title         String
+  description   String
+  price         Float
   promotedUntil DateTime?
 
   images String[] // Массив URL картинок
@@ -82,14 +90,14 @@ model Service {
 
   user     User     @relation(fields: [userId], references: [id])
   location Location @relation(fields: [locationId], references: [id])
-  category   Category @relation(fields: [categoryId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
 
   reviews Review[]
 }
 
 model Category {
-  id    String   @id @default(cuid())
-  name  String   @unique
+  id   String @id @default(cuid())
+  name String @unique
 
   services Service[]
 }
@@ -99,7 +107,7 @@ model Wallet {
   balance Float  @default(0.0)
   userId  String @unique
 
-  user User @relation(fields: [userId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
   transactions Transaction[]
 }
 
@@ -130,12 +138,12 @@ model Review {
 }
 
 model JobPost {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  category    String
-  location    String
-  createdAt   DateTime @default(now())
+  id            String    @id @default(cuid())
+  title         String
+  description   String
+  category      String
+  location      String
+  createdAt     DateTime  @default(now())
   promotedUntil DateTime?
 
   images String[] // Массив URL картинок

@@ -61,8 +61,6 @@ export async function login(phone, password) {
   if (!isPasswordValid) {
     throw new Error('Invalid credentials');
   }
-  print('Status code: ${response.statusCode}');
-  print('Body: ${response.body}');
   const token = jwt.sign(
     { userId: user.id },
     process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
