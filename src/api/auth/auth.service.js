@@ -43,7 +43,16 @@ export async function verifyOtp(phone, otp) {
     throw new Error('User not found');
   }
 
-  return { message: 'Phone number verified successfully' };
+  const token = jwt.sign(
+    { userId: user.id },
+    process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
+    { expiresIn: '7d' }
+  )
+  return { 
+    message: 'Phone number verified successfully',
+    token,
+    user,
+  };
 }
 
 export async function login(phone, password) {
@@ -66,7 +75,6 @@ export async function login(phone, password) {
     process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
     { expiresIn: '7d' }
   );
-
   return { token, user };
 }
 
@@ -98,6 +106,19 @@ export async function requestResetPassword(phone) {
   return { message: 'OTP sent to phone' };
 }
 
+export async function verifyResetOtp(phone, otp) {
+  const user = await prisma.user.findUnique({ where: { phone } });
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  if (otp !== FIXED_OTP) {
+    return res.status(400).json({ message: 'Invalid OTP' });
+  }
+
+  return { message: 'OTP verified successfully' };
+}
+
 export async function resetPassword(phone, otp, newPassword) {
   if (otp !== FIXED_OTP) {
     throw new Error('Invalid OTP');
@@ -116,5 +137,14 @@ export async function resetPassword(phone, otp, newPassword) {
     data: { passwordHash }
   });
 
-  return { message: 'Password reset successfully' };
+  const token = jwt.sign(
+    { userId: user.id },
+    process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
+    { expiresIn: '7d' }
+  )
+  return { 
+    message: 'Password reset successfully',
+    token,
+    user
+  };
 }

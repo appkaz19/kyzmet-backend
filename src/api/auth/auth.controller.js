@@ -65,6 +65,22 @@ export async function requestResetPassword(req, res) {
   }
 }
 
+export async function verifyResetOtp(req, res) {
+  try {
+    const { phone, otp } = req.body;
+    const result = await authService.verifyResetOtp(phone, otp);
+
+    if (result.status && result.message) {
+      return res.status(result.status).json({ message: result.message });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('🔥 Verify Reset OTP error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
 export async function resetPassword(req, res) {
   try {
     const { phone, otp, newPassword } = req.body;

@@ -18,6 +18,7 @@ export async function getMyProfile(req, res) {
 
 export async function updateMyProfile(req, res) {
   try {
+    console.log("updating");
     const userId = req.user.userId;
     const data = req.body;
     const result = await userService.updateUser(userId, data);

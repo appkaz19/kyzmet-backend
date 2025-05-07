@@ -13,6 +13,8 @@ router.post('/login', authController.login);
 router.post('/attach-google', authController.attachGoogle);
 // Запрос на сброс пароля
 router.post('/request-reset-password', authController.requestResetPassword);
+// Подтверждение сброса пароля по OTP
+router.post('/verify-reset-otp', authController.verifyResetOtp);
 // Сброс пароля
 router.post('/reset-password', authController.resetPassword);
 
