@@ -14,7 +14,7 @@ export async function createService(userId, data) {
       videos: videos || [],
       locationId,
       categoryId,
-      userId
+      userId: userId
     }
   });  
 
