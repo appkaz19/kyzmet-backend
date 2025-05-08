@@ -1,6 +1,6 @@
-const notificationService = require("./notifications.service");
+import * as notificationService from "./notifications.service.js";
 
-exports.getNotifications = async (req, res) => {
+export const getNotifications = async (req, res) => {
   try {
     const notifications = await notificationService.getUserNotifications(req.user.id);
     res.json(notifications);
@@ -10,7 +10,7 @@ exports.getNotifications = async (req, res) => {
   }
 };
 
-exports.markAsRead = async (req, res) => {
+export const markAsRead = async (req, res) => {
   try {
     await notificationService.markAsRead(req.params.id);
     res.json({ message: "Marked as read" });

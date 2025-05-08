@@ -1,5 +1,6 @@
-const axios = require('axios');
-require("dotenv").config();
+import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const HEARTBEAT_URL = process.env.HEARTBEAT_URL;
 const HEARTBEAT_API_KEY = process.env.HEARTBEAT_API_KEY;
@@ -34,4 +35,4 @@ async function initHeartbeatChecker() {
   }, 43200000); // 12 hours in milliseconds
 }
 
-module.exports = initHeartbeatChecker;
+export default initHeartbeatChecker;

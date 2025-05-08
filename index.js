@@ -1,18 +1,19 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 
-const initHeartbeatChecker = require("./src/middleware/heartbeatChecker");
-const loadRoutes = require("./src/api");
+import initHeartbeatChecker from "./src/middleware/heartbeatChecker.js";
+import loadRoutes from "./src/api/index.js";
 
-const swaggerUi = require("swagger-ui-express");
-const path = require("path");
+import swaggerUi from "swagger-ui-express";
+import path from "path";
 
 // Инициализация сервера
 const app = express();
 
 // Инициализация OAS Generator ПЕРЕД middleware
-const oasGenerator = require("express-oas-generator");
+import oasGenerator from "express-oas-generator";
 oasGenerator.init(app, {});
 
 // Основные middleware
@@ -20,7 +21,7 @@ initHeartbeatChecker();
 app.use(cors());
 app.use(express.json());
 
-const YAML = require("yamljs");
+import YAML from "yamljs";
 const swaggerDocument = YAML.load("./src/docs/openapi.yaml");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -34,6 +35,7 @@ app.get("/", (req, res) => {
 });
 
 // Статика
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.use(express.static(path.join(__dirname, "src/pages")));
 
 // Запуск
