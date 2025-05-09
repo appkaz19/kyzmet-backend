@@ -8,7 +8,7 @@ const router = Router();
 router.post('/', authMiddleware, serviceController.createService);
 
 // Получить услугу по ID
-router.get('/:id', serviceController.getServiceById);
+router.get('/:id', authMiddleware, serviceController.getServiceById);
 
 // Получить все услуги
 router.get('/', serviceController.getServices);

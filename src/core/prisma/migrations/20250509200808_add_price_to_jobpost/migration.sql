@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "JobPost" ADD COLUMN     "price" DOUBLE PRECISION NOT NULL DEFAULT 0;

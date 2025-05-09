@@ -3,13 +3,13 @@ const prisma = new PrismaClient();
 import { spendFromWallet } from '../wallet/wallet.service.js';
 
 export async function createJob(userId, data) {
-  const { title, description, category, location } = data;
+  const { title, description, location, price } = data;
 
   const job = await prisma.jobPost.create({
     data: {
       title,
       description,
-      category,
+      price,
       location,
       userId
     }
@@ -19,13 +19,9 @@ export async function createJob(userId, data) {
 }
 
 export async function getJobs(filters) {
-  const { category, location, search } = filters;
+  const { location, search, price } = filters;
 
   const where = {};
-
-  if (category) {
-    where.category = category;
-  }
 
   if (location) {
     where.location = location;
@@ -38,12 +34,36 @@ export async function getJobs(filters) {
     ];
   }
 
+  if (price) {
+    where.price = {
+      lte: parseFloat(price)
+    };
+  }
+
   const jobs = await prisma.jobPost.findMany({
     where,
+    include: {
+      user: {
+        select: {
+          fullName: true,
+        }
+      }
+    },
     orderBy: { createdAt: 'desc' }
   });
 
-  return jobs;
+  return jobs.map(job => {
+    console.log(job);
+
+    return {
+      id: job.id,
+      title: job.title,
+      price: job.price,
+      image: job.images.length > 0 ? job.images[0] : null,
+      author: job.user.fullName ?? 'Аноним',
+      location: job.location ?? 'Не указано',
+    };
+  });
 }
 
 export async function getJobById(id) {

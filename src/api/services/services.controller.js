@@ -14,8 +14,9 @@ export async function createService(req, res) {
 
 export async function getServiceById(req, res) {
   try {
+    const userId = req.user.userId;
     const serviceId = req.params.id;
-    const result = await serviceService.getServiceById(serviceId);
+    const result = await serviceService.getServiceById(serviceId, userId);
     res.json(result);
   } catch (error) {
     console.error('🔥 Get Service By ID error:', error);
