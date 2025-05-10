@@ -38,3 +38,4 @@ services:
 
 volumes:
   postgres_data:
+    name: kyzmet_postgres_data  # 👈 теперь имя будет фиксированное
