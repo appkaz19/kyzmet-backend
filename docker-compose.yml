@@ -14,7 +14,6 @@ services:
       SHADOW_DATABASE_URL: postgresql://naimi:naimi@postgres:5432/naimi_shadow
     volumes:
       - .:/app
-      - /app/node_modules
       - /app/node_modules/.prisma
     restart: unless-stopped
 
