@@ -2,12 +2,13 @@ version: "3.8"
 
 services:
   backend:
-    build: .
-    container_name: node-backend
+    image: kyzmet-backend
+    container_name: kyzmet-backend
     ports:
       - "6969:6969"
     depends_on:
       - postgres
+      - heartbeat
     environment:
       DATABASE_URL: postgresql://naimi:naimi@postgres:5432/naimi
       SHADOW_DATABASE_URL: postgresql://naimi:naimi@postgres:5432/naimi_shadow
@@ -15,6 +16,13 @@ services:
       - .:/app
       - /app/node_modules
       - /app/node_modules/.prisma
+    restart: unless-stopped
+
+  heartbeat:
+    image: kyzmet-backend
+    container_name: kyzmet-heartbeat
+    ports: 
+      - "8080:8080"
     restart: unless-stopped
 
   postgres:
