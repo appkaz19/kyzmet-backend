@@ -34,42 +34,6 @@ export async function getJobById(req, res) {
   }
 }
 
-export async function applyToJob(req, res) {
-  try {
-    const userId = req.user.userId;
-    const jobId = req.params.id;
-    const { message } = req.body;
-    const result = await jobService.applyToJob(userId, jobId, message);
-    res.json(result);
-  } catch (error) {
-    console.error('🔥 Apply to Job error:', error);
-    res.status(500).json({ error: 'Failed to apply to job' });
-  }
-}
-
-export async function getApplicationsForJob(req, res) {
-  try {
-    const userId = req.user.userId;
-    const jobId = req.params.id;
-    const result = await jobService.getApplicationsForJob(userId, jobId);
-    res.json(result);
-  } catch (error) {
-    console.error('🔥 Get Applications For Job error:', error);
-    res.status(500).json({ error: 'Failed to fetch applications' });
-  }
-}
-
-export async function getMyApplications(req, res) {
-  try {
-    const userId = req.user.userId;
-    const result = await jobService.getMyApplications(userId);
-    res.json(result);
-  } catch (error) {
-    console.error('🔥 Get My Applications error:', error);
-    res.status(500).json({ error: 'Failed to fetch my applications' });
-  }
-}
-
 export async function promoteJob(req, res) {
   try {
     const userId = req.user.userId;

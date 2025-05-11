@@ -9,36 +9,42 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
   phone        String?  @unique
   email        String?  @unique
   passwordHash String?
   googleId     String?  @unique
-  role         Role     @default(USER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  fullName   String?
-  nickname   String?
-  birthdate  String?
-  avatarUrl  String?
-  locationId String?
+  fullName  String?
+  nickname  String?
+  birthdate DateTime?
+  avatarUrl String?
+  regionId  String?
+  cityId    String?
 
-  jobPosts      JobPost[]
-  applications  JobApplication[]
+  jobs          Job[]
   notifications Notification[]
   wallet        Wallet?
 
-  location     Location?     @relation("UserLocation", fields: [locationId], references: [id])
-  services     Service[]
-  chatsAsUserA Chat[]        @relation("UserAChats")
-  chatsAsUserB Chat[]        @relation("UserBChats")
-  chatMessages ChatMessage[]
-  purchasedContacts   PurchasedContact[]
+  region            Region?            @relation("UserRegion", fields: [regionId], references: [id], onDelete: SetNull)
+  city              City?              @relation("UserCity", fields: [cityId], references: [id], onDelete: SetNull)
+  services          Service[]
+  chatsAsUserA      Chat[]             @relation("UserAChats")
+  chatsAsUserB      Chat[]             @relation("UserBChats")
+  chatMessages      ChatMessage[]
+  purchasedContacts PurchasedContact[]
+
+  @@index([regionId])
+  @@index([cityId])
+  @@index([phone])
+  @@index([email])
+  @@index([createdAt])
 }
 
 model Chat {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userAId   String
   userBId   String
   createdAt DateTime @default(now())
@@ -47,10 +53,12 @@ model Chat {
   userA    User          @relation("UserAChats", fields: [userAId], references: [id])
   userB    User          @relation("UserBChats", fields: [userBId], references: [id])
   messages ChatMessage[]
+
+  @@unique([userAId, userBId])
 }
 
 model ChatMessage {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   chatId    String
   senderId  String
   content   String
@@ -60,75 +68,95 @@ model ChatMessage {
   sender User @relation(fields: [senderId], references: [id])
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
-model Location {
-  id   String @id @default(cuid())
+model Region {
+  id   String @id @default(uuid())
   name String @unique
   lat  Float
   lng  Float
 
-  services Service[]
-  users    User[]    @relation("UserLocation")
+  jobs     Job[]     @relation("JobRegion")
+  users    User[]    @relation("UserRegion")
+  services Service[] @relation("ServiceRegion")
+  City     City[]
+}
+
+model City {
+  id       String @id @default(uuid())
+  name     String
+  regionId String
+
+  region   Region    @relation(fields: [regionId], references: [id])
+  users    User[]    @relation("UserCity")
+  services Service[] @relation("ServiceCity")
+  jobs     Job[]     @relation("JobCity")
+
+  @@unique([regionId, name])
 }
 
 model Service {
-  id            String    @id @default(cuid())
+  id            String    @id @default(uuid())
   title         String
   description   String
   price         Float
   promotedUntil DateTime?
-  createdAt      DateTime @default(now())
+  createdAt     DateTime  @default(now())
 
   images String[] // Массив URL картинок
   videos String[] // Массив URL видео
 
-  userId     String
-  locationId String
-  categoryId String
-  subcategoryId   String
+  userId        String
+  regionId      String?
+  cityId        String?
+  categoryId    String
+  subcategoryId String
 
-  user     User     @relation(fields: [userId], references: [id])
-  location Location @relation(fields: [locationId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
-  subcategory   Subcategory  @relation(fields: [subcategoryId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  region      Region?     @relation("ServiceRegion", fields: [regionId], references: [id], onDelete: SetNull)
+  city        City?       @relation("ServiceCity", fields: [cityId], references: [id], onDelete: SetNull)
+  category    Category    @relation(fields: [categoryId], references: [id])
+  subcategory Subcategory @relation(fields: [subcategoryId], references: [id])
 
-  reviews Review[]
-  purchasedContacts   PurchasedContact[]
+  reviews           Review[]
+  purchasedContacts PurchasedContact[]
+
+  @@index([createdAt])
+  @@index([regionId])
+  @@index([cityId])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([subcategoryId])
+  @@index([promotedUntil])
 }
 
 model PurchasedContact {
-  id      String    @id @default(cuid())
-  userId  String
-  serviceId   String
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  serviceId String
+  createdAt DateTime @default(now())
 
-  user        User      @relation(fields: [userId], references: [id])
-  service     Service   @relation(fields: [serviceId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
 }
 
 model Category {
-  id   String @id @default(cuid())
+  id   String @id @default(uuid())
   name String @unique
 
-  services Service[]
-  subcategory   Subcategory[]
+  services    Service[]
+  subcategory Subcategory[]
 }
 
 model Subcategory {
-  id    String    @id @default(cuid())
-  name  String
-  categoryId    String
-  category      Category    @relation(fields: [categoryId], references: [id])
+  id         String   @id @default(uuid())
+  name       String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
 
-  services      Service[]
+  services Service[]
 }
 
 model Wallet {
-  id      String @id @default(cuid())
+  id      String @id @default(uuid())
   balance Float  @default(0.0)
   userId  String @unique
 
@@ -137,7 +165,7 @@ model Wallet {
 }
 
 model Transaction {
-  id        String          @id @default(cuid())
+  id        String          @id @default(uuid())
   amount    Float
   type      TransactionType
   createdAt DateTime        @default(now())
@@ -149,10 +177,12 @@ model Transaction {
 enum TransactionType {
   TOP_UP
   SPEND
+  REFUND
+  BONUS
 }
 
 model Review {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   rating    Int
   comment   String
   createdAt DateTime @default(now())
@@ -160,51 +190,51 @@ model Review {
   serviceId String
 
   service Service @relation(fields: [serviceId], references: [id])
+
+  @@index([createdAt])
 }
 
-model JobPost {
-  id            String    @id @default(cuid())
+model Job {
+  id            String    @id @default(uuid())
   title         String
   description   String
   price         Float     @default(0)
-  location      String
+  address       String?
   createdAt     DateTime  @default(now())
   promotedUntil DateTime?
 
   images String[] // Массив URL картинок
   videos String[] // Массив URL видео
 
-  userId       String
-  user         User             @relation(fields: [userId], references: [id])
-  applications JobApplication[]
+  userId   String
+  regionId String?
+  cityId   String?
+
+  user   User    @relation(fields: [userId], references: [id])
+  region Region? @relation("JobRegion", fields: [regionId], references: [id], onDelete: SetNull)
+  city   City?   @relation("JobCity", fields: [cityId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([regionId])
+  @@index([cityId])
+  @@index([userId])
+  @@index([promotedUntil])
 }
 
-model JobApplication {
-  id        String            @id @default(cuid())
-  message   String
-  status    ApplicationStatus @default(PENDING)
-  createdAt DateTime          @default(now())
-
-  userId    String
-  jobPostId String
-
-  user    User    @relation(fields: [userId], references: [id])
-  jobPost JobPost @relation(fields: [jobPostId], references: [id])
-}
-
-enum ApplicationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
+enum NotificationType {
+  SYSTEM
+  CHAT
+  REVIEW
+  PROMO
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String           @id @default(uuid())
   title     String
   message   String
-  type      String // например: booking, system, review
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
