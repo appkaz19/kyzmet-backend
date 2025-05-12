@@ -1,3 +1,10 @@
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
 /auth/register:
   post:
     tags:
@@ -81,6 +88,70 @@
         description: Неверные данные
       '500':
         description: Ошибка сервера
+        
+/auth/attach-google:
+  post:
+    tags:
+      - auth
+    summary: Привязка Google-аккаунта
+    description: Привязывает Firebase Google ID к текущему авторизованному пользователю
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              firebaseGoogleId:
+                type: string
+            required:
+              - firebaseGoogleId
+    responses:
+      '200':
+        description: Аккаунт успешно привязан
+      '401':
+        description: Требуется авторизация
+      '500':
+        description: Ошибка сервера
+
+/auth/verify-reset-otp:
+  post:
+    tags:
+      - auth
+    summary: Подтверждение OTP для сброса пароля
+    description: Проверяет OTP и возвращает временный JWT-токен для дальнейшего сброса пароля
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              phone:
+                type: string
+              otp:
+                type: string
+            required:
+              - phone
+              - otp
+    responses:
+      '200':
+        description: Успешная проверка, возвращён временный токен
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otpToken:
+                  type: string
+      '400':
+        description: Неверный код
+      '404':
+        description: Пользователь не найден
+      '500':
+        description: Ошибка сервера
 
 /auth/request-reset-password:
   post:
@@ -112,7 +183,9 @@
     tags:
       - auth
     summary: Сброс пароля
-    description: Сброс пароля по номеру телефона и OTP коду
+    description: Сброс пароля через временный OTP токен, полученный после верификации
+    security:
+      - bearerAuth: []  # JWT-токен, полученный из /verify-reset-otp
     requestBody:
       required: true
       content:
@@ -120,20 +193,14 @@
           schema:
             type: object
             properties:
-              phone:
-                type: string
-              otp:
-                type: string
               newPassword:
                 type: string
             required:
-              - phone
-              - otp
               - newPassword
     responses:
       '200':
         description: Пароль успешно изменен
-      '400':
-        description: Неверный код
+      '401':
+        description: Отсутствует или неверный OTP токен
       '500':
         description: Ошибка сервера

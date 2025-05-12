@@ -2,46 +2,33 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
-// Фиксированный код для MVP
-const FIXED_OTP = '0000';
+import { otpProvider } from '../../core/otp';
 
 export async function register(phone, password) {
   const existingUser = await prisma.user.findFirst({
-    where: {
-      phone
-    }
+    where: { phone }
   });
 
-  if (existingUser) {
-    throw new Error('User already exists');
-  }
+  if (existingUser) throw new Error('User already exists');
 
   const passwordHash = await bcrypt.hash(password, 10);
-
   const user = await prisma.user.create({
-    data: {
-      phone,
-      passwordHash
-    }
+    data: { phone, passwordHash }
   });
 
-  // На реальном проекте — отправить SMS здесь
+  await otpProvider.sendOtp(phone);
   return { message: 'User registered successfully. OTP sent.', user };
 }
 
 export async function verifyOtp(phone, otp) {
-  if (otp !== FIXED_OTP) {
-    throw new Error('Invalid OTP');
-  }
+  const isValid = await otpProvider.verifyOtp(phone, otp);
+  if (!isValid) throw new Error('Invalid OTP');
 
   const user = await prisma.user.findUnique({
     where: { phone }
   });
 
-  if (!user) {
-    throw new Error('User not found');
-  }
+  if (!user) throw new Error('User not found');
 
   const token = jwt.sign(
     { userId: user.id },
@@ -57,19 +44,14 @@ export async function verifyOtp(phone, otp) {
 
 export async function login(phone, password) {
   const user = await prisma.user.findUnique({
-    where: {
-      phone
-    }
+    where: { phone }
   });
 
-  if (!user) {
-    throw new Error('Invalid credentials');
-  }
+  if (!user) throw new Error('Invalid credentials');
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-  if (!isPasswordValid) {
-    throw new Error('Invalid credentials');
-  }
+  if (!isPasswordValid) throw new Error('Invalid credentials');
+
   const token = jwt.sign(
     { userId: user.id },
     process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
@@ -81,15 +63,11 @@ export async function login(phone, password) {
 export async function attachGoogle(userId, firebaseGoogleId) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
 
-  if (!user) {
-    throw new Error('User not found');
-  }
+  if (!user) throw new Error('User not found');
 
   await prisma.user.update({
     where: { id: userId },
-    data: {
-      googleId: firebaseGoogleId
-    }
+    data: { googleId: firebaseGoogleId }
   });
 
   return { message: 'Google account attached successfully' };
@@ -98,37 +76,33 @@ export async function attachGoogle(userId, firebaseGoogleId) {
 export async function requestResetPassword(phone) {
   const user = await prisma.user.findUnique({ where: { phone } });
 
-  if (!user) {
-    throw new Error('User not found');
-  }
+  if (!user) throw new Error('User not found');
 
-  // Здесь бы отправить SMS с OTP, но пока фиксация на 0000
+  await otpProvider.sendOtp(phone);
   return { message: 'OTP sent to phone' };
 }
 
 export async function verifyResetOtp(phone, otp) {
   const user = await prisma.user.findUnique({ where: { phone } });
-  if (!user) {
-    return res.status(404).json({ message: 'User not found' });
-  }
 
-  if (otp !== FIXED_OTP) {
-    return res.status(400).json({ message: 'Invalid OTP' });
-  }
+  if (!user) throw new Error('User not found');
 
-  return { message: 'OTP verified successfully' };
+  const isValid = await otpProvider.verifyOtp(phone, otp);
+  if (!isValid) throw new Error('Invalid OTP');
+
+  const otpToken = jwt.sign(
+    { phone, purpose: 'reset_password' },
+    process.env.JWT_SECRET,
+    { expiresIn: '10m' }
+  );
+  return { message: 'OTP verified successfully', otpToken };
 }
 
-export async function resetPassword(phone, otp, newPassword) {
-  if (otp !== FIXED_OTP) {
-    throw new Error('Invalid OTP');
-  }
-
+export async function resetPassword(payload, newPassword) {
+  const { phone } = payload;
+  
   const user = await prisma.user.findUnique({ where: { phone } });
-
-  if (!user) {
-    throw new Error('User not found');
-  }
+  if (!user) throw new Error('User not found');
 
   const passwordHash = await bcrypt.hash(newPassword, 10);
 
