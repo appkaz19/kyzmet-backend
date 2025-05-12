@@ -9,13 +9,16 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  phone        String?  @unique
-  email        String?  @unique
+  id           String    @id @default(uuid())
+  phone        String?   @unique
+  email        String?   @unique
   passwordHash String?
-  googleId     String?  @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  googleId     String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+  lastSeenAt   DateTime?
+  isDeleted    Boolean   @default(false)
 
   fullName  String?
   nickname  String?
@@ -35,6 +38,7 @@ model User {
   chatsAsUserB      Chat[]             @relation("UserBChats")
   chatMessages      ChatMessage[]
   purchasedContacts PurchasedContact[]
+  Chat              Chat[]
 
   @@index([regionId])
   @@index([cityId])
@@ -44,21 +48,27 @@ model User {
 }
 
 model Chat {
-  id        String   @id @default(uuid())
-  userAId   String
-  userBId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  id              String   @id @default(uuid())
+  userAId         String
+  userBId         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt()
+  isBlocked       Boolean  @default(false)
+  blockedByUserId String?
+  unreadCount     Int      @default(0)
 
-  userA    User          @relation("UserAChats", fields: [userAId], references: [id])
-  userB    User          @relation("UserBChats", fields: [userBId], references: [id])
-  messages ChatMessage[]
+  userA     User          @relation("UserAChats", fields: [userAId], references: [id])
+  userB     User          @relation("UserBChats", fields: [userBId], references: [id])
+  blockedBy User?         @relation(fields: [blockedByUserId], references: [id])
+  messages  ChatMessage[]
 
   @@unique([userAId, userBId])
+  @@index([userAId, userBId])
+  @@index([userBId, userAId])
 }
 
 model ChatMessage {
-  id        String   @id @default(uuid())
+  id        BigInt   @id @default(autoincrement())
   chatId    String
   senderId  String
   content   String
@@ -66,6 +76,8 @@ model ChatMessage {
 
   chat   Chat @relation(fields: [chatId], references: [id])
   sender User @relation(fields: [senderId], references: [id])
+
+  @@index([chatId, createdAt])
 }
 
 model Region {
@@ -94,12 +106,13 @@ model City {
 }
 
 model Service {
-  id            String    @id @default(uuid())
+  id            BigInt    @id @default(autoincrement())
   title         String
   description   String
   price         Float
   promotedUntil DateTime?
   createdAt     DateTime  @default(now())
+  isDeleted     Boolean   @default(false)
 
   images String[] // Массив URL картинок
   videos String[] // Массив URL видео
@@ -129,9 +142,9 @@ model Service {
 }
 
 model PurchasedContact {
-  id        String   @id @default(uuid())
+  id        BigInt   @id @default(autoincrement())
   userId    String
-  serviceId String
+  serviceId BigInt
   createdAt DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
@@ -165,7 +178,7 @@ model Wallet {
 }
 
 model Transaction {
-  id        String          @id @default(uuid())
+  id        BigInt          @id @default(autoincrement())
   amount    Float
   type      TransactionType
   createdAt DateTime        @default(now())
@@ -182,12 +195,12 @@ enum TransactionType {
 }
 
 model Review {
-  id        String   @id @default(uuid())
+  id        BigInt   @id @default(autoincrement())
   rating    Int
   comment   String
   createdAt DateTime @default(now())
 
-  serviceId String
+  serviceId BigInt
 
   service Service @relation(fields: [serviceId], references: [id])
 
@@ -195,13 +208,14 @@ model Review {
 }
 
 model Job {
-  id            String    @id @default(uuid())
+  id            BigInt    @id @default(autoincrement())
   title         String
   description   String
   price         Float     @default(0)
   address       String?
   createdAt     DateTime  @default(now())
   promotedUntil DateTime?
+  isDeleted     Boolean   @default(false)
 
   images String[] // Массив URL картинок
   videos String[] // Массив URL видео
@@ -229,7 +243,7 @@ enum NotificationType {
 }
 
 model Notification {
-  id        String           @id @default(uuid())
+  id        BigInt           @id @default(autoincrement())
   title     String
   message   String
   type      NotificationType
