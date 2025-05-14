@@ -82,9 +82,10 @@ model ChatMessage {
 
 model Region {
   id   String @id @default(uuid())
-  name String @unique
   lat  Float
   lng  Float
+
+  translations RegionTranslation[]
 
   jobs     Job[]     @relation("JobRegion")
   users    User[]    @relation("UserRegion")
@@ -92,17 +93,40 @@ model Region {
   City     City[]
 }
 
+model RegionTranslation {
+  id       String  @id @default(uuid())
+  regionId String
+  language String  // "en", "ru", "kz", "uz"
+  name     String
+
+  region Region @relation(fields: [regionId], references: [id])
+
+  @@unique([regionId, language])
+}
+
 model City {
   id       String @id @default(uuid())
-  name     String
+  lat  Float
+  lng  Float
   regionId String
 
   region   Region    @relation(fields: [regionId], references: [id])
+  translations CityTranslation[]
+  
   users    User[]    @relation("UserCity")
   services Service[] @relation("ServiceCity")
   jobs     Job[]     @relation("JobCity")
+}
 
-  @@unique([regionId, name])
+model CityTranslation {
+  id       String  @id @default(uuid())
+  cityId   String
+  language String  // "en", "ru", "kz", "uz"
+  name     String
+
+  city City @relation(fields: [cityId], references: [id])
+
+  @@unique([cityId, language])
 }
 
 model Service {
