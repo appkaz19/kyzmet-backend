@@ -211,6 +211,17 @@ model Category {
   subcategory Subcategory[]
 }
 
+model CategoryTranslation {
+  id       String  @id @default(uuid())
+  categoryId   String
+  language String  // "en", "ru", "kz", "uz"
+  name     String
+
+  category category @relation(fields: [categoryId], references: [id])
+
+  @@unique([categoryId, language])
+}
+
 model Subcategory {
   id         String   @id @default(uuid())
   name       String
@@ -218,6 +229,17 @@ model Subcategory {
   category   Category @relation(fields: [categoryId], references: [id])
 
   services Service[]
+}
+
+model SubcategoryTranslation {
+  id       String  @id @default(uuid())
+  subcategoryId   String
+  language String  // "en", "ru", "kz", "uz"
+  name     String
+
+  subcategory Subcategory @relation(fields: [subcategoryId], references: [id])
+
+  @@unique([subcatehlgoryId, language])
 }
 
 model Wallet {
