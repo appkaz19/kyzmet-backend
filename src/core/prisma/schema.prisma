@@ -8,6 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Language {
+  en
+  ru
+  kz
+  uz
+}
+
 model User {
   id           String    @id @default(uuid())
   phone        String?   @unique
@@ -96,7 +103,7 @@ model Region {
 model RegionTranslation {
   id       String  @id @default(uuid())
   regionId String
-  language String  // "en", "ru", "kz", "uz"
+  language Language  // "en", "ru", "kz", "uz"
   name     String
 
   region Region @relation(fields: [regionId], references: [id])
@@ -121,7 +128,7 @@ model City {
 model CityTranslation {
   id       String  @id @default(uuid())
   cityId   String
-  language String  // "en", "ru", "kz", "uz"
+  language Language  // "en", "ru", "kz", "uz"
   name     String
 
   city City @relation(fields: [cityId], references: [id])
@@ -214,7 +221,7 @@ model Category {
 model CategoryTranslation {
   id       String  @id @default(uuid())
   categoryId   String
-  language String  // "en", "ru", "kz", "uz"
+  language Language  // "en", "ru", "kz", "uz"
   name     String
 
   category category @relation(fields: [categoryId], references: [id])
@@ -234,12 +241,12 @@ model Subcategory {
 model SubcategoryTranslation {
   id       String  @id @default(uuid())
   subcategoryId   String
-  language String  // "en", "ru", "kz", "uz"
+  language Language  // "en", "ru", "kz", "uz"
   name     String
 
   subcategory Subcategory @relation(fields: [subcategoryId], references: [id])
 
-  @@unique([subcatehlgoryId, language])
+  @@unique([subcategoryId, language])
 }
 
 model Wallet {
