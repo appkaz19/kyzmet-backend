@@ -11,7 +11,7 @@ datasource db {
 enum Language {
   en
   ru
-  kz
+  kk
   uz
 }
 
@@ -88,22 +88,22 @@ model ChatMessage {
 }
 
 model Region {
-  id   String @id @default(uuid())
-  lat  Float
-  lng  Float
+  id  String @id @default(uuid())
+  lat Float
+  lng Float
 
   translations RegionTranslation[]
 
   jobs     Job[]     @relation("JobRegion")
   users    User[]    @relation("UserRegion")
   services Service[] @relation("ServiceRegion")
-  City     City[]
+  cities     City[]
 }
 
 model RegionTranslation {
-  id       String  @id @default(uuid())
+  id       String   @id @default(uuid())
   regionId String
-  language Language  // "en", "ru", "kz", "uz"
+  language Language // "en", "ru", "kz", "uz"
   name     String
 
   region Region @relation(fields: [regionId], references: [id])
@@ -113,22 +113,22 @@ model RegionTranslation {
 
 model City {
   id       String @id @default(uuid())
-  lat  Float
-  lng  Float
+  lat      Float
+  lng      Float
   regionId String
 
-  region   Region    @relation(fields: [regionId], references: [id])
+  region       Region            @relation(fields: [regionId], references: [id])
   translations CityTranslation[]
-  
+
   users    User[]    @relation("UserCity")
   services Service[] @relation("ServiceCity")
   jobs     Job[]     @relation("JobCity")
 }
 
 model CityTranslation {
-  id       String  @id @default(uuid())
+  id       String   @id @default(uuid())
   cityId   String
-  language Language  // "en", "ru", "kz", "uz"
+  language Language // "en", "ru", "kz", "uz"
   name     String
 
   city City @relation(fields: [cityId], references: [id])
@@ -214,17 +214,18 @@ model Category {
   id   String @id @default(uuid())
   name String @unique
 
-  services    Service[]
-  subcategory Subcategory[]
+  services            Service[]
+  subcategory         Subcategory[]
+  CategoryTranslation CategoryTranslation[]
 }
 
 model CategoryTranslation {
-  id       String  @id @default(uuid())
-  categoryId   String
-  language Language  // "en", "ru", "kz", "uz"
-  name     String
+  id         String   @id @default(uuid())
+  categoryId String
+  language   Language // "en", "ru", "kz", "uz"
+  name       String
 
-  category category @relation(fields: [categoryId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
 
   @@unique([categoryId, language])
 }
@@ -235,14 +236,15 @@ model Subcategory {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
-  services Service[]
+  services               Service[]
+  SubcategoryTranslation SubcategoryTranslation[]
 }
 
 model SubcategoryTranslation {
-  id       String  @id @default(uuid())
-  subcategoryId   String
-  language Language  // "en", "ru", "kz", "uz"
-  name     String
+  id            String   @id @default(uuid())
+  subcategoryId String
+  language      Language // "en", "ru", "kz", "uz"
+  name          String
 
   subcategory Subcategory @relation(fields: [subcategoryId], references: [id])
 

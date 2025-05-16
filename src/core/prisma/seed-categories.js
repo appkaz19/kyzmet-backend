@@ -1989,19 +1989,51 @@ async function main() {
   for (const category of categories) {
     const createdCategory = await prisma.category.create({
       data: {
-        name: category.name,
-        subcategory: {
-          create: category.subcategories.map((sub) => ({ name: sub }))
-        }
+        name: category.name.en // Store one language as placeholder (optional if not used)
       }
     });
-    console.log(`Created category: ${createdCategory.name}`);
+
+    // Create Category Translations
+    await Promise.all(
+      Object.entries(category.name).map(([lang, name]) =>
+        prisma.categoryTranslation.create({
+          data: {
+            categoryId: createdCategory.id,
+            language: lang,
+            name
+          }
+        })
+      )
+    );
+
+    for (const sub of category.subcategories) {
+      const createdSubcategory = await prisma.subcategory.create({
+        data: {
+          name: sub.en, // Placeholder name
+          categoryId: createdCategory.id
+        }
+      });
+
+      await Promise.all(
+        Object.entries(sub).map(([lang, name]) =>
+          prisma.subcategoryTranslation.create({
+            data: {
+              subcategoryId: createdSubcategory.id,
+              language: lang,
+              name
+            }
+          })
+        )
+      );
+    }
+
+    console.log(`Created category: ${category.name.en}`);
   }
 }
 
 main()
   .then(() => {
-    console.log('Seeding completed.');
+    console.log("Seeding completed.");
     return prisma.$disconnect();
   })
   .catch(async (e) => {

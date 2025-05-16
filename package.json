@@ -8,7 +8,9 @@
     "start": "node index.js",
     "lock-n-load": "node scripts/heartbeatServer.js",
     "build:openapi": "node scripts/combine-openapi.js",
-    "seed-locations": "node src/core/prisma/seed-locations.js"
+    "seed-locations-kz": "node src/core/prisma/seed-locations-kz.js",
+    "seed-locations-uz": "node src/core/prisma/seed-locations-uz.js",
+    "seed-categories": "node src/core/prisma/seed-categories.js"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",

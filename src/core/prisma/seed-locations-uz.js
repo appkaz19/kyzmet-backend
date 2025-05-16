@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const regions = [
@@ -1153,7 +1153,7 @@ async function seed() {
           })),
         },
         cities: {
-          create: region.cities.map(city => ({
+          create: region.city.map(city => ({
             lat: city.lat,
             lng: city.lng,
             translations: {
