@@ -88,3 +88,16 @@ export async function resetPassword(req, res) {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export async function adminLogin(req, res) {
+  try {
+    const { email, password } = req.body;
+    const result = await authService.adminLogin(email, password);
+    console.log('✅ [auth] Admin logged in:', result.admin?.id);
+    res.json(result);
+  } catch (error) {
+    console.error('🔥 Admin login error:', error);
+    if (error.message === 'Invalid credentials') return res.status(401).json({ error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}

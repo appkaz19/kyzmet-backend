@@ -9,23 +9,37 @@ export async function getUserById(id) {
       email: true,
       phone: true,
       googleId: true,
+      fullName: true,
+      nickname: true,
+      birthdate: true,
+      avatarUrl: true,
+      regionId: true,
+      cityId: true,
       createdAt: true
     }
   });
 
-  if (!user) {
-    throw new Error('User not found');
-  }
+  if (!user) throw new Error('User not found');
 
   return user;
 }
 
 export async function updateUser(id, data) {
-  const allowedFields = ['email', 'phone', 'fullName', 'nickname', 'birthdate', 'locationId', 'avatarUrl'];
+  const allowedFields = [
+    'email',
+    'phone',
+    'fullName',
+    'nickname',
+    'birthdate',
+    'regionId',
+    'cityId',
+    'avatarUrl'
+  ];
+  
   const updateData = {};
 
   for (const field of allowedFields) {
-    if (data[field]) {
+    if (data[field] !== undefined) {
       updateData[field] = data[field];
     }
   }
@@ -42,6 +56,12 @@ export async function updateUser(id, data) {
       email: true,
       phone: true,
       googleId: true,
+      fullName: true,
+      nickname: true,
+      birthdate: true,
+      avatarUrl: true,
+      regionId: true,
+      cityId: true,
       createdAt: true
     }
   });

@@ -5,7 +5,7 @@
     summary: Создать услугу
     description: Создает новую услугу
     security:
-      - BearerAuth: []
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -27,21 +27,64 @@
                 type: array
                 items:
                   type: string
-              locationId:
+              regionId:
+                type: string
+              cityId:
                 type: string
               categoryId:
+                type: string
+              subcategoryId:
                 type: string
             required:
               - title
               - description
               - price
-              - locationId
+              - regionId
+              - cityId
               - categoryId
+              - subcategoryId
     responses:
       '201':
         description: Услуга создана
       '400':
         description: Ошибка данных
+      '500':
+        description: Ошибка сервера
+
+/services:
+  get:
+    tags:
+      - services
+    summary: Получить список услуг
+    description: Получает список услуг с возможностью фильтрации по региону, городу, категории, подкатегории, поиску и цене
+    parameters:
+      - name: regionId
+        in: query
+        schema:
+          type: string
+      - name: cityId
+        in: query
+        schema:
+          type: string
+      - name: categoryId
+        in: query
+        schema:
+          type: string
+      - name: subcategoryId
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: price
+        in: query
+        schema:
+          type: number
+    responses:
+      '200':
+        description: Список услуг получен
       '500':
         description: Ошибка сервера
 

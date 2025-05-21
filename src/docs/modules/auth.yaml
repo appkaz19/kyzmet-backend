@@ -204,3 +204,31 @@ components:
         description: Отсутствует или неверный OTP токен
       '500':
         description: Ошибка сервера
+
+/auth/admin-login:
+  post:
+    tags:
+      - auth
+    summary: Логин администратора
+    description: Вход администратора по номеру телефона и паролю
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              login:
+                type: string
+              password:
+                type: string
+            required:
+              - login
+              - password
+    responses:
+      '200':
+        description: Успешный вход администратора
+      '400':
+        description: Неверные данные администратора
+      '500':
+        description: Ошибка сервера

@@ -1,41 +1,81 @@
-/users/me:
-  get:
-    tags:
-      - users
-    summary: Получить свой профиль
-    description: Возвращает информацию о текущем пользователе
-    security:
-      - BearerAuth: []
-    responses:
-      '200':
-        description: Данные профиля
-      '401':
-        description: Не авторизован
-      '500':
-        description: Ошибка сервера
+openapi: 3.0.0
+info:
+  title: Users API
+  version: 1.0.0
+paths:
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: Получить свой профиль
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Успешно получен профиль
+        '401':
+          description: Неавторизованный доступ
+        '404':
+          description: Пользователь не найден
+        '500':
+          description: Ошибка сервера
+    patch:
+      tags:
+        - users
+      summary: Обновить свой профиль
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                phone: { type: string }
+                fullName: { type: string }
+                nickname: { type: string }
+                birthdate: { type: string, format: date }
+                regionId: { type: string }
+                cityId: { type: string }
+                avatarUrl: { type: string }
+      responses:
+        '200':
+          description: Профиль обновлен
+        '400':
+          description: Неверные поля
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Ошибка сервера
 
-  patch:
-    tags:
-      - users
-    summary: Обновить свой профиль
-    description: Обновляет email или телефон пользователя
-    security:
-      - BearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
+  /users/{id}:
+    get:
+      tags:
+        - users
+      summary: Получить профиль другого пользователя по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
           schema:
-            type: object
-            properties:
-              phone:
-                type: string
-              email:
-                type: string
-    responses:
-      '200':
-        description: Профиль обновлен
-      '400':
-        description: Ошибка данных
-      '500':
-        description: Ошибка сервера
+            type: string
+      responses:
+        '200':
+          description: Успешно получен профиль пользователя
+        '401':
+          description: Неавторизованный доступ
+        '404':
+          description: Пользователь не найден
+        '500':
+          description: Ошибка сервера
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

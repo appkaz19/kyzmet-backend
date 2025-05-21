@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { otpProvider } from '../../core/otp';
+import { fixedOtpProvider } from '../../core/otp/index.js';
 
 export async function register(phone, password) {
   const existingUser = await prisma.user.findFirst({
@@ -16,12 +16,12 @@ export async function register(phone, password) {
     data: { phone, passwordHash }
   });
 
-  await otpProvider.sendOtp(phone);
+  await fixedOtpProvider.sendOtp(phone);
   return { message: 'User registered successfully. OTP sent.', user };
 }
 
 export async function verifyOtp(phone, otp) {
-  const isValid = await otpProvider.verifyOtp(phone, otp);
+  const isValid = await fixedOtpProvider.verifyOtp(phone, otp);
   if (!isValid) throw new Error('Invalid OTP');
 
   const user = await prisma.user.findUnique({
@@ -78,7 +78,7 @@ export async function requestResetPassword(phone) {
 
   if (!user) throw new Error('User not found');
 
-  await otpProvider.sendOtp(phone);
+  await fixedOtpProvider.sendOtp(phone);
   return { message: 'OTP sent to phone' };
 }
 
@@ -87,7 +87,7 @@ export async function verifyResetOtp(phone, otp) {
 
   if (!user) throw new Error('User not found');
 
-  const isValid = await otpProvider.verifyOtp(phone, otp);
+  const isValid = await fixedOtpProvider.verifyOtp(phone, otp);
   if (!isValid) throw new Error('Invalid OTP');
 
   const otpToken = jwt.sign(
@@ -121,4 +121,21 @@ export async function resetPassword(payload, newPassword) {
     token,
     user
   };
+}
+
+export async function adminLogin(email, password) {
+  const admin = await prisma.admin.findUnique({ where: { email } });
+
+  if (!admin) throw new Error('Invalid credentials');
+
+  const isValid = await bcrypt.compare(password, admin.passwordHash);
+  if (!isValid) throw new Error('Invalid credentials');
+
+  const token = jwt.sign(
+    { adminId: admin.id, role: 'admin' },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  return { token, admin: { id: admin.id, email: admin.email } };
 }

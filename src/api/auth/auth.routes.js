@@ -1,5 +1,6 @@
 import express from 'express';
 import * as authController from './auth.controller.js';
+import { authMiddleware } from '../../middleware/authMiddleware.js';
 import { requireOtpToken } from '../../middleware/requireOtpToken.js';
 
 const router = express.Router();
@@ -18,5 +19,8 @@ router.post('/request-reset-password', authController.requestResetPassword);
 router.post('/verify-reset-otp', authController.verifyResetOtp);
 // Сброс пароля
 router.post('/reset-password', requireOtpToken('reset_password'), authController.resetPassword);
+
+// Admin Login
+router.post('/admin-login', authController.adminLogin);
 
 export default router;

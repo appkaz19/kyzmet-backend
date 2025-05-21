@@ -7,11 +7,7 @@ export async function getMyProfile(req, res) {
     res.json(result);
   } catch (error) {
     console.error('🔥 Get My Profile error:', error);
-
-    if (error.message === 'User not found') {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
+    if (error.message === 'User not found') return res.status(404).json({ error: 'User not found' });
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
 }
@@ -25,11 +21,7 @@ export async function updateMyProfile(req, res) {
     res.json(result);
   } catch (error) {
     console.error('🔥 Update My Profile error:', error);
-
-    if (error.message === 'No valid fields provided for update') {
-      return res.status(400).json({ error: 'No valid fields provided for update' });
-    }
-
+    if (error.message === 'No valid fields provided for update') return res.status(400).json({ error: 'No valid fields provided for update' });
     res.status(500).json({ error: 'Failed to update profile' });
   }
 }
@@ -41,11 +33,7 @@ export async function getUserById(req, res) {
     res.json(result);
   } catch (error) {
     console.error('🔥 Get User By ID error:', error);
-
-    if (error.message === 'User not found') {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
+    if (error.message === 'User not found') return res.status(404).json({ error: 'User not found' });
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 }

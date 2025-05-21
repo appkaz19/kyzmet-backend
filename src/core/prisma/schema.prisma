@@ -15,6 +15,12 @@ enum Language {
   uz
 }
 
+model Admin {
+  id           String    @id @default(uuid())
+  login        String    @unique
+  passwordHash String    
+}
+
 model User {
   id           String    @id @default(uuid())
   phone        String?   @unique

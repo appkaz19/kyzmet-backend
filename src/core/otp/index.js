@@ -1,1 +1,1 @@
-export * as otpProvider from './fixedOtpProvider.js';
+export * as fixedOtpProvider from './fixedOtpProvider.js';

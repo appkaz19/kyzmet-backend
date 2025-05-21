@@ -3,6 +3,10 @@ import * as locationController from './location.controller.js';
 
 const router = Router();
 
-router.get('/', locationController.getAll);
+// Fetch all regions with cities and translations
+router.get('/regions', locationController.getAllRegions);
+
+// Fetch cities by region ID
+router.get('/regions/:regionId/cities', locationController.getCitiesByRegion);
 
 export default router;

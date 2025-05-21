@@ -7,13 +7,9 @@ export async function getMyWallet(userId) {
     include: { transactions: true }
   });
 
-  // Если нет кошелька — создать новый с нулевым балансом
   if (!wallet) {
     wallet = await prisma.wallet.create({
-      data: {
-        userId,
-        balance: 0
-      }
+      data: { userId, balance: 0 }
     });
   }
 
@@ -21,51 +17,34 @@ export async function getMyWallet(userId) {
 }
 
 export async function topUpWallet(userId, amount) {
-  if (amount <= 0) {
-    throw new Error('Amount must be positive');
-  }
+  if (amount <= 0) throw new Error('Amount must be positive');
 
-  const wallet = await getMyWallet(userId);
-
-  const updatedWallet = await prisma.wallet.update({
-    where: { id: wallet.id },
+  return await prisma.wallet.update({
+    where: { userId },
     data: {
       balance: { increment: amount },
       transactions: {
-        create: {
-          amount,
-          type: 'TOP_UP'
-        }
+        create: { amount, type: 'TOP_UP' }
       }
-    }
+    },
+    include: { transactions: true }
   });
-
-  return updatedWallet;
 }
 
 export async function spendFromWallet(userId, amount) {
-  if (amount <= 0) {
-    throw new Error('Amount must be positive');
-  }
+  if (amount <= 0) throw new Error('Amount must be positive');
 
   const wallet = await getMyWallet(userId);
+  if (wallet.balance < amount) throw new Error('Insufficient balance');
 
-  if (wallet.balance < amount) {
-    throw new Error('Insufficient balance');
-  }
-
-  const updatedWallet = await prisma.wallet.update({
+  return await prisma.wallet.update({
     where: { id: wallet.id },
     data: {
       balance: { decrement: amount },
       transactions: {
-        create: {
-          amount: -amount,
-          type: 'SPEND'
-        }
+        create: { amount: -amount, type: 'SPEND' }
       }
-    }
+    },
+    include: { transactions: true }
   });
-
-  return updatedWallet;
 }

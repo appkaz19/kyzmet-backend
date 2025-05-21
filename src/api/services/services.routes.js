@@ -4,22 +4,22 @@ import { authMiddleware } from '../../middleware/authMiddleware.js';
 
 const router = Router();
 
-// Создать услугу
+// Create a new service
 router.post('/', authMiddleware, serviceController.createService);
 
-// Получить услугу по ID
+// Get service details by ID
 router.get('/:id', authMiddleware, serviceController.getServiceById);
 
-// Получить все услуги
+// Fetch all services (with optional filters)
 router.get('/', serviceController.getServices);
 
-// Обновить свою услугу
+// Update user's own service
 router.patch('/:id', authMiddleware, serviceController.updateService);
 
-// Поднять в топ
+// Promote service
 router.post('/:id/promote', authMiddleware, serviceController.promoteService);
 
-// Купить контакт провайдера
+// Buy provider contact
 router.post('/:id/contact', authMiddleware, serviceController.buyProviderContact);
 
 export default router;

@@ -2,9 +2,7 @@ import * as serviceService from './services.service.js';
 
 export async function createService(req, res) {
   try {
-    const userId = req.user.userId;
-    const serviceData = req.body;
-    const result = await serviceService.createService(userId, serviceData);
+    const result = await serviceService.createService(req.user.userId, req.body);
     res.json(result);
   } catch (error) {
     console.error('🔥 Create Service error:', error);
@@ -14,20 +12,17 @@ export async function createService(req, res) {
 
 export async function getServiceById(req, res) {
   try {
-    const userId = req.user.userId;
-    const serviceId = req.params.id;
-    const result = await serviceService.getServiceById(serviceId, userId);
+    const result = await serviceService.getServiceById(req.params.id, req.user.userId);
     res.json(result);
   } catch (error) {
     console.error('🔥 Get Service By ID error:', error);
-    res.status(500).json({ error: 'Failed to fetch service' });
+    res.status(404).json({ error: error.message });
   }
 }
 
 export async function getServices(req, res) {
   try {
-    const filters = req.query;
-    const result = await serviceService.getServices(filters);
+    const result = await serviceService.getServices(req.query);
     res.json(result);
   } catch (error) {
     console.error('🔥 Get Services error:', error);
@@ -37,38 +32,31 @@ export async function getServices(req, res) {
 
 export async function updateService(req, res) {
   try {
-    const userId = req.user.userId;
-    const serviceId = req.params.id;
-    const serviceData = req.body;
-    const result = await serviceService.updateService(userId, serviceId, serviceData);
+    const result = await serviceService.updateService(req.user.userId, req.params.id, req.body);
     res.json(result);
   } catch (error) {
     console.error('🔥 Update Service error:', error);
-    res.status(500).json({ error: 'Failed to update service' });
+    res.status(403).json({ error: error.message });
   }
 }
 
 export async function promoteService(req, res) {
   try {
-    const userId = req.user.userId;
-    const serviceId = req.params.id;
     const { days } = req.body;
-    const result = await serviceService.promoteService(userId, serviceId, days);
+    const result = await serviceService.promoteService(req.user.userId, req.params.id, days);
     res.json(result);
   } catch (error) {
     console.error('🔥 Promote Service error:', error);
-    res.status(500).json({ error: 'Failed to promote service' });
+    res.status(400).json({ error: error.message });
   }
 }
 
 export async function buyProviderContact(req, res) {
   try {
-    const userId = req.user.userId;
-    const serviceId = req.params.id;
-    const result = await serviceService.buyProviderContact(userId, serviceId);
+    const result = await serviceService.buyProviderContact(req.user.userId, req.params.id);
     res.json(result);
   } catch (error) {
     console.error('🔥 Buy Provider Contact error:', error);
-    res.status(500).json({ error: 'Failed to buy provider contact' });
+    res.status(400).json({ error: error.message });
   }
 }

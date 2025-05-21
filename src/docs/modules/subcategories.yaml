@@ -1,0 +1,131 @@
+openapi: 3.0.0
+info:
+  title: Subcategories API
+  version: 1.0.0
+paths:
+  /subcategories/by-category/{categoryId}:
+    get:
+      tags:
+        - subcategories
+      summary: Получить подкатегории по ID категории
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum: [en, ru, kk, uz]
+            default: en
+      responses:
+        '200':
+          description: Список подкатегорий успешно получен
+        '500':
+          description: Ошибка сервера
+
+  /subcategories:
+    post:
+      tags:
+        - subcategories
+      summary: Создание новой подкатегории
+      security:
+        - adminBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId:
+                  type: string
+                translations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      language:
+                        type: string
+                        enum: [en, ru, kk, uz]
+                      name:
+                        type: string
+              required:
+                - categoryId
+                - translations
+      responses:
+        '200':
+          description: Подкатегория создана
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Ошибка сервера
+
+  /subcategories/{id}:
+    patch:
+      tags:
+        - subcategories
+      summary: Обновление подкатегории
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                translations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      language:
+                        type: string
+                        enum: [en, ru, kk, uz]
+                      name:
+                        type: string
+              required:
+                - translations
+      responses:
+        '200':
+          description: Подкатегория обновлена
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Ошибка сервера
+
+    delete:
+      tags:
+        - subcategories
+      summary: Удаление подкатегории
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Подкатегория удалена
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Ошибка сервера
+
+components:
+  securitySchemes:
+    adminBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
