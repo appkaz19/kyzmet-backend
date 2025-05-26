@@ -6,7 +6,15 @@ export async function getByUser(userId) {
     where: { userId },
     select: {
       serviceId: true,
-      createdAt: true
+      createdAt: true,
+      service: {
+        select: {
+          title: true,
+          user: {
+            select: { phone: true, email: true, fullName: true }
+          }
+        }
+      }
     }
   });
 }

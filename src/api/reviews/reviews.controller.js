@@ -2,21 +2,24 @@ import * as reviewService from './reviews.service.js';
 
 export async function submitReview(req, res) {
   try {
-    const userId = req.user.userId;
-    const review = await reviewService.submitReview(userId, req.body);
+    const review = await reviewService.submitReview(req.user.userId, req.body);
     res.json(review);
   } catch (error) {
-    console.error('🔥 Submit review error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('🔥 Submit Review Error:', error);
+    res.status(400).json({ error: error.message });
   }
 }
 
 export async function getReviews(req, res) {
   try {
-    const reviews = await reviewService.getReviewsByService(req.query.serviceId);
+    const serviceId = req.query.serviceId;
+    if (!serviceId) {
+      return res.status(400).json({ error: 'serviceId is required' });
+    }
+    const reviews = await reviewService.getReviewsByService(serviceId);
     res.json(reviews);
   } catch (error) {
-    console.error('🔥 Fetch reviews error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('🔥 Fetch Reviews Error:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 }

@@ -1,45 +1,40 @@
-openapi: 3.0.0
-info:
-  title: Location API
-  version: 1.0.0
-paths:
-  /location/regions:
-    get:
-      tags:
-        - location
-      summary: Получить список всех регионов и городов
-      parameters:
-        - name: lang
-          in: query
-          schema:
-            type: string
-            enum: [en, ru, kk, uz]
-            default: en
-      responses:
-        '200':
-          description: Список регионов успешно получен
-        '500':
-          description: Ошибка сервера
+/location/regions:
+  get:
+    tags:
+      - location
+    summary: Получить список всех регионов и городов
+    parameters:
+      - name: lang
+        in: query
+        schema:
+          type: string
+          enum: [en, ru, kk, uz]
+          default: en
+    responses:
+      '200':
+        description: Список регионов успешно получен
+      '500':
+        description: Ошибка сервера
 
-  /location/regions/{regionId}/cities:
-    get:
-      tags:
-        - location
-      summary: Получить список городов по региону
-      parameters:
-        - name: regionId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: lang
-          in: query
-          schema:
-            type: string
-            enum: [en, ru, kk, uz]
-            default: en
-      responses:
-        '200':
-          description: Список городов успешно получен
-        '500':
-          description: Ошибка сервера
+/location/regions/{regionId}/cities:
+  get:
+    tags:
+      - location
+    summary: Получить список городов по региону
+    parameters:
+      - name: regionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        schema:
+          type: string
+          enum: [en, ru, kk, uz]
+          default: en
+    responses:
+      '200':
+        description: Список городов успешно получен
+      '500':
+        description: Ошибка сервера

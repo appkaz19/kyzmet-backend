@@ -8,12 +8,13 @@ servers:
 
 components:
   securitySchemes:
-    BearerAuth:
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
-security:
-  - BearerAuth: []
+    adminBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
 paths: {}

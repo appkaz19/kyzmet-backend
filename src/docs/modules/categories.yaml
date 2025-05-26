@@ -1,142 +1,130 @@
-openapi: 3.0.0
-info:
-  title: Categories API
-  version: 1.0.0
-paths:
-  /categories:
-    get:
-      tags:
-        - categories
-      summary: Получить список всех категорий
-      description: Возвращает список категорий с учетом выбранного языка
-      parameters:
-        - name: lang
-          in: query
+/categories:
+  get:
+    tags:
+      - categories
+    summary: Получить список всех категорий
+    description: Возвращает список категорий с учетом выбранного языка
+    parameters:
+      - name: lang
+        in: query
+        schema:
+          type: string
+          enum: [en, ru, kk, uz]
+          default: en
+    responses:
+      '200':
+        description: Успешный ответ со списком категорий
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  translations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+      '500':
+        description: Ошибка сервера
+
+  post:
+    tags:
+      - categories
+    summary: Создание новой категории
+    description: Создаёт новую категорию с переводами (только для администраторов)
+    security:
+      - adminBearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
           schema:
-            type: string
-            enum: [en, ru, kk, uz]
-            default: en
-      responses:
-        '200':
-          description: Успешный ответ со списком категорий
-          content:
-            application/json:
-              schema:
+            type: object
+            properties:
+              translations:
                 type: array
                 items:
                   type: object
                   properties:
-                    id:
+                    language:
                       type: string
-                    translations:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-        '500':
-          description: Ошибка сервера
+                      enum: [en, ru, kk, uz]
+                    name:
+                      type: string
+            required:
+              - translations
+    responses:
+      '200':
+        description: Категория успешно создана
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
 
-    post:
-      tags:
-        - categories
-      summary: Создание новой категории
-      description: Создаёт новую категорию с переводами (только для администраторов)
-      security:
-        - adminBearerAuth: []
-      requestBody:
+/categories/{id}:
+  patch:
+    tags:
+      - categories
+    summary: Обновление существующей категории
+    description: Обновляет переводы существующей категории (только для администраторов)
+    security:
+      - adminBearerAuth: []
+    parameters:
+      - name: id
+        in: path
         required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                translations:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      language:
-                        type: string
-                        enum: [en, ru, kk, uz]
-                      name:
-                        type: string
-              required:
-                - translations
-      responses:
-        '200':
-          description: Категория успешно создана
-        '401':
-          description: Неавторизованный доступ
-        '500':
-          description: Ошибка сервера
-
-  /categories/{id}:
-    patch:
-      tags:
-        - categories
-      summary: Обновление существующей категории
-      description: Обновляет переводы существующей категории (только для администраторов)
-      security:
-        - adminBearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
           schema:
-            type: string
-      requestBody:
+            type: object
+            properties:
+              translations:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    language:
+                      type: string
+                      enum: [en, ru, kk, uz]
+                    name:
+                      type: string
+            required:
+              - translations
+    responses:
+      '200':
+        description: Категория успешно обновлена
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
+
+  delete:
+    tags:
+      - categories
+    summary: Удаление категории
+    description: Удаляет категорию и все её переводы (только для администраторов)
+    security:
+      - adminBearerAuth: []
+    parameters:
+      - name: id
+        in: path
         required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                translations:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      language:
-                        type: string
-                        enum: [en, ru, kk, uz]
-                      name:
-                        type: string
-              required:
-                - translations
-      responses:
-        '200':
-          description: Категория успешно обновлена
-        '401':
-          description: Неавторизованный доступ
-        '500':
-          description: Ошибка сервера
-
-    delete:
-      tags:
-        - categories
-      summary: Удаление категории
-      description: Удаляет категорию и все её переводы (только для администраторов)
-      security:
-        - adminBearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Категория успешно удалена
-        '401':
-          description: Неавторизованный доступ
-        '500':
-          description: Ошибка сервера
-
-components:
-  securitySchemes:
-    adminBearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Категория успешно удалена
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера

@@ -1,82 +1,71 @@
-openapi: 3.0.0
-info:
-  title: Wallet API
-  version: 1.0.0
-paths:
-  /wallet:
-    get:
-      tags:
-        - wallet
-      summary: Получить кошелек текущего пользователя
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Успешно получен кошелек
-        '401':
-          description: Неавторизованный доступ
-        '500':
-          description: Ошибка сервера
+/wallet:
+  get:
+    tags:
+      - wallet
+    summary: Получить кошелек текущего пользователя
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Успешно получен кошелек
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
 
-  /wallet/top-up:
-    post:
-      tags:
-        - wallet
-      summary: Пополнение кошелька
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                amount:
-                  type: number
-              required:
-                - amount
-      responses:
-        '200':
-          description: Успешно пополнено
-        '400':
-          description: Неверная сумма
-        '401':
-          description: Неавторизованный доступ
-        '500':
-          description: Ошибка сервера
+/wallet/top-up:
+  post:
+    tags:
+      - wallet
+    summary: Пополнение кошелька
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              amount:
+                type: number
+            required:
+              - amount
+    responses:
+      '200':
+        description: Успешно пополнено
+      '400':
+        description: Неверная сумма
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
 
-  /wallet/spend:
-    post:
-      tags:
-        - wallet
-      summary: Потратить монеты из кошелька
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                amount:
-                  type: number
-              required:
-                - amount
-      responses:
-        '200':
-          description: Успешно потрачено
-        '400':
-          description: Недостаточно средств или неверная сумма
-        '401':
-          description: Неавторизованный доступ
-        '500':
-          description: Ошибка сервера
+/wallet/spend:
+  post:
+    tags:
+      - wallet
+    summary: Потратить монеты из кошелька
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              amount:
+                type: number
+            required:
+              - amount
+    responses:
+      '200':
+        description: Успешно потрачено
+      '400':
+        description: Недостаточно средств или неверная сумма
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
 
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT

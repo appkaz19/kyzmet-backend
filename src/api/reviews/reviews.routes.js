@@ -1,13 +1,13 @@
-import express from 'express';
+import { Router } from 'express';
 import { authMiddleware } from '../../middleware/authMiddleware.js';
-import * as controller from './reviews.controller.js';
+import * as reviewController from './reviews.controller.js';
 
-const router = express.Router();
+const router = Router();
 
-// POST /reviews — оставить отзыв на услугу
-router.post('/', authMiddleware, controller.submitReview);
+// Оставить отзыв на услугу
+router.post('/', authMiddleware, reviewController.submitReview);
 
-// GET /reviews?serviceId=... — получить отзывы по услуге
-router.get('/', controller.getReviews);
+// Получить отзывы по услуге
+router.get('/', reviewController.getReviews);
 
 export default router;

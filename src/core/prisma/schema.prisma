@@ -33,6 +33,8 @@ model User {
   lastSeenAt   DateTime?
   isDeleted    Boolean   @default(false)
 
+  pushToken    String?
+
   fullName  String?
   nickname  String?
   birthdate DateTime?

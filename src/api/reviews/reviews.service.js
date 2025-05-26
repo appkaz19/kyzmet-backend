@@ -31,14 +31,10 @@ export async function submitReview(userId, data) {
 }
 
 export async function getReviewsByService(serviceId) {
-  if (!serviceId) {
-    throw new Error('Missing serviceId in query');
-  }
-
   return prisma.review.findMany({
     where: { serviceId },
     include: {
-      user: { select: { email: true } },
+      user: { select: { email: true, fullName: true } },
     },
     orderBy: { createdAt: 'desc' },
   });

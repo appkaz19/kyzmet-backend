@@ -3,7 +3,24 @@
     tags:
       - jobs
     summary: Получить список заданий
-    description: Возвращает все активные задания (JobPost)
+    description: Возвращает все активные задания (Job)
+    parameters:
+      - name: regionId
+        in: query
+        schema:
+          type: string
+      - name: cityId
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: price
+        in: query
+        schema:
+          type: number
     responses:
       '200':
         description: Список заданий
@@ -16,7 +33,7 @@
     summary: Создать задание
     description: Создает новое задание
     security:
-      - BearerAuth: []
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -28,14 +45,28 @@
                 type: string
               description:
                 type: string
-              category:
+              price:
+                type: number
+              images:
+                type: array
+                items:
+                  type: string
+              videos:
+                type: array
+                items:
+                  type: string
+              regionId:
                 type: string
-              location:
+              cityId:
+                type: string
+              address:
                 type: string
             required:
               - title
               - description
-              - category
+              - price
+              - regionId
+              - cityId
     responses:
       '201':
         description: Задание создано
@@ -44,36 +75,23 @@
       '500':
         description: Ошибка сервера
 
-/jobs/{id}/apply:
-  post:
+/jobs/{id}:
+  get:
     tags:
       - jobs
-    summary: Отклик на задание
-    description: Авторизованный пользователь откликается на задание
-    security:
-      - BearerAuth: []
+    summary: Получить задание по ID
+    description: Возвращает детальную информацию о задании по его ID
     parameters:
       - name: id
         in: path
         required: true
         schema:
           type: string
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-            required:
-              - message
     responses:
       '200':
-        description: Отклик отправлен
-      '400':
-        description: Ошибка запроса
+        description: Информация о задании получена
+      '404':
+        description: Задание не найдено
       '500':
         description: Ошибка сервера
 
@@ -84,7 +102,7 @@
     summary: Поднять задание в топ
     description: Платное продвижение задания на 3 или 7 дней
     security:
-      - BearerAuth: []
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -100,13 +118,16 @@
             properties:
               days:
                 type: integer
+                enum: [3, 7]
             required:
               - days
     responses:
       '200':
         description: Задание продвинуто
       '400':
-        description: Ошибка данных
+        description: Ошибка данных или недостаточно средств
+      '403':
+        description: Нет прав на продвижение задания
       '500':
         description: Ошибка сервера
 
@@ -117,7 +138,7 @@
     summary: Купить контакт нанимателя
     description: Открывает контактную информацию нанимателя за монеты
     security:
-      - BearerAuth: []
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -128,6 +149,8 @@
       '200':
         description: Контакт получен
       '400':
-        description: Ошибка
+        description: Недостаточно средств
+      '404':
+        description: Задание не найдено
       '500':
         description: Ошибка сервера

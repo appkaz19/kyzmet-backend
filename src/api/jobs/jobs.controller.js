@@ -2,9 +2,7 @@ import * as jobService from './jobs.service.js';
 
 export async function createJob(req, res) {
   try {
-    const userId = req.user.userId;
-    const jobData = req.body;
-    const result = await jobService.createJob(userId, jobData);
+    const result = await jobService.createJob(req.user.userId, req.body);
     res.json(result);
   } catch (error) {
     console.error('🔥 Create Job error:', error);
@@ -14,8 +12,7 @@ export async function createJob(req, res) {
 
 export async function getJobs(req, res) {
   try {
-    const filters = req.query;
-    const result = await jobService.getJobs(filters);
+    const result = await jobService.getJobs(req.query);
     res.json(result);
   } catch (error) {
     console.error('🔥 Get Jobs error:', error);
@@ -25,8 +22,7 @@ export async function getJobs(req, res) {
 
 export async function getJobById(req, res) {
   try {
-    const jobId = req.params.id;
-    const result = await jobService.getJobById(jobId);
+    const result = await jobService.getJobById(req.params.id);
     res.json(result);
   } catch (error) {
     console.error('🔥 Get Job By ID error:', error);
@@ -36,10 +32,8 @@ export async function getJobById(req, res) {
 
 export async function promoteJob(req, res) {
   try {
-    const userId = req.user.userId;
-    const jobId = req.params.id;
     const { days } = req.body;
-    const result = await jobService.promoteJob(userId, jobId, days);
+    const result = await jobService.promoteJob(req.user.userId, req.params.id, days);
     res.json(result);
   } catch (error) {
     console.error('🔥 Promote Job error:', error);
@@ -49,9 +43,7 @@ export async function promoteJob(req, res) {
 
 export async function buyEmployerContact(req, res) {
   try {
-    const userId = req.user.userId;
-    const jobId = req.params.id;
-    const result = await jobService.buyEmployerContact(userId, jobId);
+    const result = await jobService.buyEmployerContact(req.user.userId, req.params.id);
     res.json(result);
   } catch (error) {
     console.error('🔥 Buy Employer Contact error:', error);

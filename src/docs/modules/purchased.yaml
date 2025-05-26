@@ -1,0 +1,15 @@
+/purchased:
+  get:
+    tags:
+      - purchased
+    summary: Получить купленные контакты
+    description: Возвращает контакты услуг, приобретенных пользователем
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Список купленных контактов
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера

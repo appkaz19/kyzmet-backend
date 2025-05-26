@@ -7,12 +7,14 @@ servers:
   - url: http://localhost:6969/api
 components:
   securitySchemes:
-    BearerAuth:
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-security:
-  - BearerAuth: []
+    adminBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 paths:
   /auth/register:
     post:
@@ -95,6 +97,69 @@ paths:
           description: Неверные данные
         "500":
           description: Ошибка сервера
+  /auth/attach-google:
+    post:
+      tags:
+        - auth
+      summary: Привязка Google-аккаунта
+      description: Привязывает Firebase Google ID к текущему авторизованному пользователю
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firebaseGoogleId:
+                  type: string
+              required:
+                - firebaseGoogleId
+      responses:
+        "200":
+          description: Аккаунт успешно привязан
+        "401":
+          description: Требуется авторизация
+        "500":
+          description: Ошибка сервера
+  /auth/verify-reset-otp:
+    post:
+      tags:
+        - auth
+      summary: Подтверждение OTP для сброса пароля
+      description: Проверяет OTP и возвращает временный JWT-токен для дальнейшего
+        сброса пароля
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                otp:
+                  type: string
+              required:
+                - phone
+                - otp
+      responses:
+        "200":
+          description: Успешная проверка, возвращён временный токен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  otpToken:
+                    type: string
+        "400":
+          description: Неверный код
+        "404":
+          description: Пользователь не найден
+        "500":
+          description: Ошибка сервера
   /auth/request-reset-password:
     post:
       tags:
@@ -124,7 +189,9 @@ paths:
       tags:
         - auth
       summary: Сброс пароля
-      description: Сброс пароля по номеру телефона и OTP коду
+      description: Сброс пароля через временный OTP токен, полученный после верификации
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -132,21 +199,181 @@ paths:
             schema:
               type: object
               properties:
-                phone:
-                  type: string
-                otp:
-                  type: string
                 newPassword:
                   type: string
               required:
-                - phone
-                - otp
                 - newPassword
       responses:
         "200":
           description: Пароль успешно изменен
+        "401":
+          description: Отсутствует или неверный OTP токен
+        "500":
+          description: Ошибка сервера
+  /auth/admin-login:
+    post:
+      tags:
+        - auth
+      summary: Логин администратора
+      description: Вход администратора по номеру телефона и паролю
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+              required:
+                - login
+                - password
+      responses:
+        "200":
+          description: Успешный вход администратора
         "400":
-          description: Неверный код
+          description: Неверные данные администратора
+        "500":
+          description: Ошибка сервера
+  /categories:
+    get:
+      tags:
+        - categories
+      summary: Получить список всех категорий
+      description: Возвращает список категорий с учетом выбранного языка
+      parameters:
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum:
+              - en
+              - ru
+              - kk
+              - uz
+            default: en
+      responses:
+        "200":
+          description: Успешный ответ со списком категорий
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    translations:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+        "500":
+          description: Ошибка сервера
+    post:
+      tags:
+        - categories
+      summary: Создание новой категории
+      description: Создаёт новую категорию с переводами (только для администраторов)
+      security:
+        - adminBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                translations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      language:
+                        type: string
+                        enum:
+                          - en
+                          - ru
+                          - kk
+                          - uz
+                      name:
+                        type: string
+              required:
+                - translations
+      responses:
+        "200":
+          description: Категория успешно создана
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  "/categories/{id}":
+    patch:
+      tags:
+        - categories
+      summary: Обновление существующей категории
+      description: Обновляет переводы существующей категории (только для администраторов)
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                translations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      language:
+                        type: string
+                        enum:
+                          - en
+                          - ru
+                          - kk
+                          - uz
+                      name:
+                        type: string
+              required:
+                - translations
+      responses:
+        "200":
+          description: Категория успешно обновлена
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+    delete:
+      tags:
+        - categories
+      summary: Удаление категории
+      description: Удаляет категорию и все её переводы (только для администраторов)
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Категория успешно удалена
+        "401":
+          description: Неавторизованный доступ
         "500":
           description: Ошибка сервера
   /chats/start:
@@ -247,7 +474,24 @@ paths:
       tags:
         - jobs
       summary: Получить список заданий
-      description: Возвращает все активные задания (JobPost)
+      description: Возвращает все активные задания (Job)
+      parameters:
+        - name: regionId
+          in: query
+          schema:
+            type: string
+        - name: cityId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: price
+          in: query
+          schema:
+            type: number
       responses:
         "200":
           description: Список заданий
@@ -259,209 +503,7 @@ paths:
       summary: Создать задание
       description: Создает новое задание
       security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                description:
-                  type: string
-                category:
-                  type: string
-                location:
-                  type: string
-              required:
-                - title
-                - description
-                - category
-      responses:
-        "201":
-          description: Задание создано
-        "400":
-          description: Ошибка данных
-        "500":
-          description: Ошибка сервера
-  "/jobs/{id}/apply":
-    post:
-      tags:
-        - jobs
-      summary: Отклик на задание
-      description: Авторизованный пользователь откликается на задание
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-              required:
-                - message
-      responses:
-        "200":
-          description: Отклик отправлен
-        "400":
-          description: Ошибка запроса
-        "500":
-          description: Ошибка сервера
-  "/jobs/{id}/promote":
-    post:
-      tags:
-        - jobs
-      summary: Поднять задание в топ
-      description: Платное продвижение задания на 3 или 7 дней
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                days:
-                  type: integer
-              required:
-                - days
-      responses:
-        "200":
-          description: Задание продвинуто
-        "400":
-          description: Ошибка данных
-        "500":
-          description: Ошибка сервера
-  "/jobs/{id}/contact":
-    post:
-      tags:
-        - jobs
-      summary: Купить контакт нанимателя
-      description: Открывает контактную информацию нанимателя за монеты
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Контакт получен
-        "400":
-          description: Ошибка
-        "500":
-          description: Ошибка сервера
-  /notifications:
-    get:
-      tags:
-        - notifications
-      summary: Получить список уведомлений
-      description: Возвращает список всех уведомлений текущего пользователя
-      security:
-        - BearerAuth: []
-      responses:
-        "200":
-          description: Список уведомлений
-        "500":
-          description: Ошибка при получении уведомлений
-  "/notifications/{id}/read":
-    patch:
-      tags:
-        - notifications
-      summary: Пометить уведомление как прочитанное
-      description: Отмечает конкретное уведомление как прочитанное по ID
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID уведомления
-      responses:
-        "200":
-          description: Уведомление помечено как прочитанное
-        "500":
-          description: Ошибка при обновлении уведомления
-  /reviews:
-    get:
-      tags:
-        - reviews
-      summary: Получить отзывы по провайдеру
-      description: Публичный список отзывов по providerId (в query-параметрах)
-      parameters:
-        - name: providerId
-          in: query
-          required: true
-          schema:
-            type: string
-          description: ID провайдера
-      responses:
-        "200":
-          description: Список отзывов
-        "400":
-          description: Отсутствует providerId
-        "500":
-          description: Ошибка сервера
-    post:
-      tags:
-        - reviews
-      summary: Оставить отзыв провайдеру
-      description: Клиент оставляет отзыв (оценка и комментарий) провайдеру
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                providerId:
-                  type: string
-                rating:
-                  type: number
-                comment:
-                  type: string
-              required:
-                - providerId
-                - rating
-      responses:
-        "200":
-          description: Отзыв добавлен
-        "400":
-          description: Ошибка данных
-        "500":
-          description: Ошибка сервера
-  /services:
-    post:
-      tags:
-        - services
-      summary: Создать услугу
-      description: Создает новую услугу
-      security:
-        - BearerAuth: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -483,21 +525,367 @@ paths:
                   type: array
                   items:
                     type: string
-                locationId:
+                regionId:
                   type: string
-                categoryId:
+                cityId:
+                  type: string
+                address:
                   type: string
               required:
                 - title
                 - description
                 - price
-                - locationId
+                - regionId
+                - cityId
+      responses:
+        "201":
+          description: Задание создано
+        "400":
+          description: Ошибка данных
+        "500":
+          description: Ошибка сервера
+  "/jobs/{id}":
+    get:
+      tags:
+        - jobs
+      summary: Получить задание по ID
+      description: Возвращает детальную информацию о задании по его ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Информация о задании получена
+        "404":
+          description: Задание не найдено
+        "500":
+          description: Ошибка сервера
+  "/jobs/{id}/promote":
+    post:
+      tags:
+        - jobs
+      summary: Поднять задание в топ
+      description: Платное продвижение задания на 3 или 7 дней
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                days:
+                  type: integer
+                  enum:
+                    - 3
+                    - 7
+              required:
+                - days
+      responses:
+        "200":
+          description: Задание продвинуто
+        "400":
+          description: Ошибка данных или недостаточно средств
+        "403":
+          description: Нет прав на продвижение задания
+        "500":
+          description: Ошибка сервера
+  "/jobs/{id}/contact":
+    post:
+      tags:
+        - jobs
+      summary: Купить контакт нанимателя
+      description: Открывает контактную информацию нанимателя за монеты
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Контакт получен
+        "400":
+          description: Недостаточно средств
+        "404":
+          description: Задание не найдено
+        "500":
+          description: Ошибка сервера
+  /location/regions:
+    get:
+      tags:
+        - location
+      summary: Получить список всех регионов и городов
+      parameters:
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum:
+              - en
+              - ru
+              - kk
+              - uz
+            default: en
+      responses:
+        "200":
+          description: Список регионов успешно получен
+        "500":
+          description: Ошибка сервера
+  "/location/regions/{regionId}/cities":
+    get:
+      tags:
+        - location
+      summary: Получить список городов по региону
+      parameters:
+        - name: regionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum:
+              - en
+              - ru
+              - kk
+              - uz
+            default: en
+      responses:
+        "200":
+          description: Список городов успешно получен
+        "500":
+          description: Ошибка сервера
+  /notifications:
+    get:
+      tags:
+        - notifications
+      summary: Получить список уведомлений
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Список уведомлений получен
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  /notifications/unread/count:
+    get:
+      tags:
+        - notifications
+      summary: Получить количество непрочитанных уведомлений
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Количество непрочитанных уведомлений
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  "/notifications/{id}/read":
+    patch:
+      tags:
+        - notifications
+      summary: Пометить уведомление как прочитанное
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Уведомление помечено как прочитанное
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  /notifications/read-all:
+    patch:
+      tags:
+        - notifications
+      summary: Пометить все уведомления как прочитанные
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Все уведомления помечены как прочитанные
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  /purchased:
+    get:
+      tags:
+        - purchased
+      summary: Получить купленные контакты
+      description: Возвращает контакты услуг, приобретенных пользователем
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Список купленных контактов
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  /reviews:
+    post:
+      tags:
+        - reviews
+      summary: Оставить отзыв на услугу
+      description: Клиент оставляет отзыв на услугу
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceId:
+                  type: string
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+              required:
+                - serviceId
+                - rating
+      responses:
+        "200":
+          description: Отзыв успешно оставлен
+        "400":
+          description: Ошибка данных
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+    get:
+      tags:
+        - reviews
+      summary: Получить отзывы по услуге
+      description: Возвращает список отзывов для конкретной услуги
+      parameters:
+        - name: serviceId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Список отзывов получен
+        "400":
+          description: Не указан serviceId
+        "500":
+          description: Ошибка сервера
+  /services:
+    post:
+      tags:
+        - services
+      summary: Создать услугу
+      description: Создает новую услугу
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                images:
+                  type: array
+                  items:
+                    type: string
+                videos:
+                  type: array
+                  items:
+                    type: string
+                regionId:
+                  type: string
+                cityId:
+                  type: string
+                categoryId:
+                  type: string
+                subcategoryId:
+                  type: string
+              required:
+                - title
+                - description
+                - price
+                - regionId
+                - cityId
                 - categoryId
+                - subcategoryId
       responses:
         "201":
           description: Услуга создана
         "400":
           description: Ошибка данных
+        "500":
+          description: Ошибка сервера
+    get:
+      tags:
+        - services
+      summary: Получить список услуг
+      description: Получает список услуг с возможностью фильтрации по региону, городу,
+        категории, подкатегории, поиску и цене
+      parameters:
+        - name: regionId
+          in: query
+          schema:
+            type: string
+        - name: cityId
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+        - name: subcategoryId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: price
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Список услуг получен
         "500":
           description: Ошибка сервера
   "/services/{id}/promote":
@@ -553,28 +941,39 @@ paths:
           description: Ошибка
         "500":
           description: Ошибка сервера
-  /users/me:
+  "/subcategories/by-category/{categoryId}":
     get:
       tags:
-        - users
-      summary: Получить свой профиль
-      description: Возвращает информацию о текущем пользователе
-      security:
-        - BearerAuth: []
+        - subcategories
+      summary: Получить подкатегории по ID категории
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum:
+              - en
+              - ru
+              - kk
+              - uz
+            default: en
       responses:
         "200":
-          description: Данные профиля
-        "401":
-          description: Не авторизован
+          description: Список подкатегорий успешно получен
         "500":
           description: Ошибка сервера
-    patch:
+  /subcategories:
+    post:
       tags:
-        - users
-      summary: Обновить свой профиль
-      description: Обновляет email или телефон пользователя
+        - subcategories
+      summary: Создание новой подкатегории
       security:
-        - BearerAuth: []
+        - adminBearerAuth: []
       requestBody:
         required: true
         content:
@@ -582,40 +981,192 @@ paths:
             schema:
               type: object
               properties:
+                categoryId:
+                  type: string
+                translations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      language:
+                        type: string
+                        enum:
+                          - en
+                          - ru
+                          - kk
+                          - uz
+                      name:
+                        type: string
+              required:
+                - categoryId
+                - translations
+      responses:
+        "200":
+          description: Подкатегория создана
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  "/subcategories/{id}":
+    patch:
+      tags:
+        - subcategories
+      summary: Обновление подкатегории
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                translations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      language:
+                        type: string
+                        enum:
+                          - en
+                          - ru
+                          - kk
+                          - uz
+                      name:
+                        type: string
+              required:
+                - translations
+      responses:
+        "200":
+          description: Подкатегория обновлена
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+    delete:
+      tags:
+        - subcategories
+      summary: Удаление подкатегории
+      security:
+        - adminBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Подкатегория удалена
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: Получить свой профиль
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Успешно получен профиль
+        "401":
+          description: Неавторизованный доступ
+        "404":
+          description: Пользователь не найден
+        "500":
+          description: Ошибка сервера
+    patch:
+      tags:
+        - users
+      summary: Обновить свой профиль
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
                 phone:
                   type: string
-                email:
+                fullName:
+                  type: string
+                nickname:
+                  type: string
+                birthdate:
+                  type: string
+                  format: date
+                regionId:
+                  type: string
+                cityId:
+                  type: string
+                avatarUrl:
                   type: string
       responses:
         "200":
           description: Профиль обновлен
         "400":
-          description: Ошибка данных
+          description: Неверные поля
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  "/users/{id}":
+    get:
+      tags:
+        - users
+      summary: Получить профиль другого пользователя по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Успешно получен профиль пользователя
+        "401":
+          description: Неавторизованный доступ
+        "404":
+          description: Пользователь не найден
         "500":
           description: Ошибка сервера
   /wallet:
     get:
       tags:
         - wallet
-      summary: Получить свой кошелек
-      description: Возвращает текущий баланс пользователя и историю транзакций
+      summary: Получить кошелек текущего пользователя
       security:
-        - BearerAuth: []
+        - bearerAuth: []
       responses:
         "200":
-          description: Баланс и транзакции
+          description: Успешно получен кошелек
         "401":
-          description: Не авторизован
+          description: Неавторизованный доступ
         "500":
           description: Ошибка сервера
   /wallet/top-up:
     post:
       tags:
         - wallet
-      summary: Пополнить кошелек (заглушка)
-      description: Пополняет баланс монет через тестовый метод
+      summary: Пополнение кошелька
       security:
-        - BearerAuth: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -629,8 +1180,37 @@ paths:
                 - amount
       responses:
         "200":
-          description: Баланс пополнен
+          description: Успешно пополнено
         "400":
-          description: Ошибка данных
+          description: Неверная сумма
+        "401":
+          description: Неавторизованный доступ
+        "500":
+          description: Ошибка сервера
+  /wallet/spend:
+    post:
+      tags:
+        - wallet
+      summary: Потратить монеты из кошелька
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+              required:
+                - amount
+      responses:
+        "200":
+          description: Успешно потрачено
+        "400":
+          description: Недостаточно средств или неверная сумма
+        "401":
+          description: Неавторизованный доступ
         "500":
           description: Ошибка сервера

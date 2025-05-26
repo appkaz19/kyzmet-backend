@@ -3,32 +3,63 @@
     tags:
       - notifications
     summary: Получить список уведомлений
-    description: Возвращает список всех уведомлений текущего пользователя
     security:
-      - BearerAuth: []
+      - bearerAuth: []
     responses:
       '200':
-        description: Список уведомлений
+        description: Список уведомлений получен
+      '401':
+        description: Неавторизованный доступ
       '500':
-        description: Ошибка при получении уведомлений
+        description: Ошибка сервера
+
+/notifications/unread/count:
+  get:
+    tags:
+      - notifications
+    summary: Получить количество непрочитанных уведомлений
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Количество непрочитанных уведомлений
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
 
 /notifications/{id}/read:
   patch:
     tags:
       - notifications
     summary: Пометить уведомление как прочитанное
-    description: Отмечает конкретное уведомление как прочитанное по ID
     security:
-      - BearerAuth: []
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
         required: true
         schema:
           type: string
-        description: ID уведомления
     responses:
       '200':
         description: Уведомление помечено как прочитанное
+      '401':
+        description: Неавторизованный доступ
       '500':
-        description: Ошибка при обновлении уведомления
+        description: Ошибка сервера
+
+/notifications/read-all:
+  patch:
+    tags:
+      - notifications
+    summary: Пометить все уведомления как прочитанные
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Все уведомления помечены как прочитанные
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера

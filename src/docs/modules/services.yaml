@@ -51,7 +51,6 @@
       '500':
         description: Ошибка сервера
 
-/services:
   get:
     tags:
       - services

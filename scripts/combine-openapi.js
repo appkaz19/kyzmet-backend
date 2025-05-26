@@ -1,6 +1,10 @@
-const fs = require("fs");
-const path = require("path");
-const yaml = require("yaml");
+import fs from "fs";
+import path from "path";
+import yaml from "yaml";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Загрузка базового openapi (без paths)
 const basePath = path.join(__dirname, "../src/docs/openapi.base.yaml");
