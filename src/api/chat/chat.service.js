@@ -1,3 +1,4 @@
+import admin from '../../core/firebase.js';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
@@ -92,6 +93,22 @@ export async function sendMessage(userId, chatId, content) {
       content
     }
   });
+
+  const recepient = chat.userAId === userId ? chat.userB : chat.userA;
+
+  if (recepient.pushToken) {
+    await admin.messaging().send({
+      token: recepient.pushToken,
+      notification: {
+        title: '📩 New Message',
+        body: content.slice(0, 100),
+      },
+      data: {
+        type: 'chat',
+        chatId,
+      }
+    });
+  }
 
   return message;
 }

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { messaging } from '../../core/firebase.js';
 const prisma = new PrismaClient();
 
 export async function getUserNotifications(userId) {
@@ -26,4 +27,24 @@ export async function markAllAsRead(userId) {
     where: { userId, isRead: false },
     data: { isRead: true },
   });
+}
+
+export async function sendPushNotification(token, title, body, data = {}) {
+  try {
+    const message = {
+      token,
+      notification: {
+        title,
+        body,
+      },
+      data, // Optional custom data for in-app navigation, etc.
+    };
+
+    const response = await messaging.send(message);
+    console.log('✅ Push sent:', response);
+    return response;
+  } catch (error) {
+    console.error('❌ Error sending push:', error);
+    throw error;
+  }
 }

@@ -37,3 +37,17 @@ export async function getUserById(req, res) {
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 }
+
+export async function setPushToken(req, res) {
+  try {
+    const userId = req.user.userId;
+    const { pushToken } = req.body;
+
+    await userService.updatePushToken(userId, pushToken);
+
+    res.json({ success: true });
+  } catch (e) {
+    console.error('🔥 Push Token Error:', e);
+    res.status(500).json({ error: 'Failed to save push token' });
+  }
+}

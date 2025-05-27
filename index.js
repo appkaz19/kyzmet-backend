@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { Server } from 'socket.io';
+import jwt from 'jsonwebtoken';
+import { handleSocketConnection } from './src/socket/chat.gateway.js';
 dotenv.config();
 
 import initHeartbeatChecker from "./src/middleware/heartbeatChecker.js";
@@ -11,6 +14,29 @@ import path from "path";
 
 // Инициализация сервера
 const app = express();
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: { origin: '*' }
+});
+
+io.use((sockey, next) => {
+  const token = Socket.handshake.auth?.token;
+  if (!token) return next(new Error('Auth token required'));
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    Socket.userId = payload.userId;
+    next();
+  } catch (err) {
+    next(new Error('Invalid token'));
+  }
+});
+
+io.on('connection', (socket) => {
+  handleSocketConnection(io, socket);
+});
 
 // Инициализация OAS Generator ПЕРЕД middleware
 import oasGenerator from "express-oas-generator";

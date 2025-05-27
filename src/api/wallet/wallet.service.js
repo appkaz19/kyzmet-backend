@@ -1,3 +1,4 @@
+import admin from '../../core/firebase.js';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
@@ -19,7 +20,7 @@ export async function getMyWallet(userId) {
 export async function topUpWallet(userId, amount) {
   if (amount <= 0) throw new Error('Amount must be positive');
 
-  return await prisma.wallet.update({
+  wallet = await prisma.wallet.update({
     where: { userId },
     data: {
       balance: { increment: amount },
@@ -29,6 +30,25 @@ export async function topUpWallet(userId, amount) {
     },
     include: { transactions: true }
   });
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (user?.pushToken) {
+    await admin.messaging().send({
+      token: user.pushToken,
+      notification: {
+        title: '💰 Wallet Top-Up',
+        body: `Your balance increased by ₸${amount}`,
+      },
+      data: {
+        type: 'wallet',
+      }
+    });
+  }
+
+  return wallet;
 }
 
 export async function spendFromWallet(userId, amount) {

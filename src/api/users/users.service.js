@@ -68,3 +68,10 @@ export async function updateUser(id, data) {
 
   return user;
 }
+
+export async function updatePushToken(userId, pushToken) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { pushToken },
+  });
+}
