@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { admin } from '../../core/firebase.js';
+import admin from '../../core/firebase.js';
 const messaging = admin.messaging();
 const prisma = new PrismaClient();
 
