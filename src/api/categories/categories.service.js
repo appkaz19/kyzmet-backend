@@ -5,7 +5,7 @@ export async function getAllCategories(language = 'ru') {
   return await prisma.category.findMany({
     select: {
       id: true,
-      translations: {
+      CategoryTranslation: {
         where: { language },
         select: { name: true }
       }
@@ -16,7 +16,7 @@ export async function getAllCategories(language = 'ru') {
 export async function createCategory({ translations }) {
   return await prisma.category.create({
     data: {
-      translations: {
+      CategoryTranslation: {
         create: translations.map(t => ({
           language: t.language,
           name: t.name
@@ -32,7 +32,7 @@ export async function updateCategory(id, { translations }) {
   return await prisma.category.update({
     where: { id },
     data: {
-      translations: {
+      CategoryTranslation: {
         create: translations.map(t => ({
           language: t.language,
           name: t.name

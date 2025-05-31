@@ -8,22 +8,27 @@ export async function createService(userId, data) {
     regionId, cityId, categoryId, subcategoryId
   } = data;
 
-  return prisma.service.create({
+  const service = await prisma.service.create({
     data: {
       title, description, price, images, videos,
       regionId, cityId, categoryId, subcategoryId, userId
     }
   });
+
+  return JSON.parse(
+    JSON.stringify(service, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    )
+  );
 }
 
 export async function getServiceById(id, userId) {
   const service = await prisma.service.findUnique({
     where: { id },
     include: {
-      region: { include: { translations: true } },
       city: { include: { translations: true } },
-      category: { include: { translations: true } },
-      subcategory: { include: { translations: true } },
+      category: { include: { CategoryTranslation: true } },
+      subcategory: { include: { SubcategoryTranslation: true } },
       user: { select: { id: true, phone: true, email: true } }
     }
   });
@@ -34,11 +39,17 @@ export async function getServiceById(id, userId) {
     where: { userId, serviceId: id }
   });
 
-  return {
+  const result = {
     ...service,
     contactUnlocked: !!purchased,
     contact: purchased ? service.user : null
   };
+
+  return JSON.parse(
+    JSON.stringify(result, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    )
+  );
 }
 
 export async function getServices(filters = {}) {
@@ -69,20 +80,23 @@ export async function getServices(filters = {}) {
     orderBy: [{ promotedUntil: 'desc' }, { createdAt: 'desc' }]
   });
 
-  return services.map(service => {
-    const ratingSum = service.reviews.reduce((sum, r) => sum + r.rating, 0);
-    const rating = service.reviews.length ? (ratingSum / service.reviews.length).toFixed(1) : null;
+  return JSON.parse(
+    JSON.stringify(services.map(service => {
+      const ratingSum = (service.reviews || []).reduce((sum, r) => sum + (r.rating || 0), 0);
+      const rating = (service.reviews && service.reviews.length) ? (ratingSum / service.reviews.length).toFixed(1) : null;
 
-    return {
-      id: service.id,
-      title: service.title,
-      price: service.price,
-      image: service.images[0] || null,
-      author: service.user.fullName,
-      rating,
-      reviewsCount: service.reviews.length,
-    };
-  });
+      return {
+        id: service.id,
+        title: service.title,
+        price: service.price,
+        image: Array.isArray(service.images) && service.images.length > 0 ? service.images[0] : null,
+        author: service.user && service.user.fullName ? service.user.fullName : '',
+        rating,
+        reviewsCount: (service.reviews || []).length,
+      };
+    }),
+    (key, value) => typeof value === 'bigint' ? value.toString() : value)
+  );
 }
 
 export async function updateService(userId, serviceId, data) {

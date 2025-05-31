@@ -6,7 +6,7 @@ export async function getSubcategoriesByCategory(categoryId, language = 'ru') {
     where: { categoryId },
     select: {
       id: true,
-      translations: {
+      SubcategoryTranslation: {
         where: { language },
         select: { name: true }
       }
@@ -18,7 +18,7 @@ export async function createSubcategory({ categoryId, translations }) {
   return prisma.subcategory.create({
     data: {
       categoryId,
-      translations: {
+      SubcategoryTranslation: {
         create: translations.map(t => ({
           language: t.language,
           name: t.name
@@ -34,7 +34,7 @@ export async function updateSubcategory(id, { translations }) {
   return prisma.subcategory.update({
     where: { id },
     data: {
-      translations: {
+      SubcategoryTranslation: {
         create: translations.map(t => ({
           language: t.language,
           name: t.name
