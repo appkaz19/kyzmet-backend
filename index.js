@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { handleSocketConnection } from './src/socket/chat.gateway.js';
+import http from 'http';
 dotenv.config();
 
 import initHeartbeatChecker from "./src/middleware/heartbeatChecker.js";
