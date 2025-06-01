@@ -29,7 +29,7 @@ export async function getServiceById(id, userId) {
       city: { include: { translations: true } },
       category: { include: { CategoryTranslation: true } },
       subcategory: { include: { SubcategoryTranslation: true } },
-      user: { select: { id: true, phone: true, email: true } }
+      user: { select: { id: true, phone: true, email: true, fullName: true } }
     }
   });
 
