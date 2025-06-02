@@ -17,21 +17,26 @@ export async function removeFavoriteService(userId, serviceId) {
 export async function getFavoriteServices(userId) {
   const favorites = await prisma.favoriteService.findMany({
     where: { userId },
-    include: { service: { include: { user: { select: { fullName: true } } } } },
     orderBy: { createdAt: 'desc' }
   });
-  return JSON.parse(
-    JSON.stringify(
-      favorites.map(f => ({
-        id: f.service.id,
-        title: f.service.title,
-        price: f.service.price,
-        image: Array.isArray(f.service.images) && f.service.images.length > 0 ? f.service.images[0] : null,
-        author: f.service.user?.fullName || ''
-      })),
-      (k, v) => typeof v === 'bigint' ? v.toString() : v
-    )
-  );
+  const serviceIds = favorites.map(f => f.serviceId);
+  const services = await prisma.service.findMany({
+    where: { id: { in: serviceIds } },
+    include: { user: { select: { fullName: true } } }
+  });
+  const serviceMap = new Map(services.map(s => [s.id.toString(), s]));
+  return favorites.map(f => {
+    const service = serviceMap.get(f.serviceId.toString());
+    return service
+      ? {
+          id: service.id,
+          title: service.title,
+          price: service.price,
+          image: Array.isArray(service.images) && service.images.length > 0 ? service.images[0] : null,
+          author: service.user?.fullName || ''
+        }
+      : null;
+  }).filter(Boolean);
 }
 
 export async function addFavoriteJob(userId, jobId) {
@@ -50,17 +55,27 @@ export async function removeFavoriteJob(userId, jobId) {
 export async function getFavoriteJobs(userId) {
   const favorites = await prisma.favoriteJob.findMany({
     where: { userId },
-    include: { job: { include: { user: { select: { fullName: true } } } } },
     orderBy: { createdAt: 'desc' }
   });
-  return favorites.map(f => ({
-    id: f.job.id,
-    title: f.job.title,
-    price: f.job.price,
-    image: f.job.images.length > 0 ? f.job.images[0] : null,
-    author: f.job.user.fullName ?? 'Аноним',
-    regionId: f.job.regionId,
-    cityId: f.job.cityId,
-    address: f.job.address || 'Не указано'
-  }));
+  const jobIds = favorites.map(f => f.jobId);
+  const jobs = await prisma.job.findMany({
+    where: { id: { in: jobIds } },
+    include: { user: { select: { fullName: true } } }
+  });
+  const jobMap = new Map(jobs.map(j => [j.id.toString(), j]));
+  return favorites.map(f => {
+    const job = jobMap.get(f.jobId.toString());
+    return job
+      ? {
+          id: job.id,
+          title: job.title,
+          price: job.price,
+          image: Array.isArray(job.images) && job.images.length > 0 ? job.images[0] : null,
+          author: job.user?.fullName ?? 'Аноним',
+          regionId: job.regionId,
+          cityId: job.cityId,
+          address: job.address || 'Не указано'
+        }
+      : null;
+  }).filter(Boolean);
 }

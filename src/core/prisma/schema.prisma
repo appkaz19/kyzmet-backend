@@ -322,8 +322,7 @@ model FavoriteService {
   serviceId BigInt
   createdAt DateTime @default(now())
 
-  user    User    @relation(fields: [userId], references: [id])
-  service Service @relation(fields: [serviceId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, serviceId])
 }
@@ -335,7 +334,6 @@ model FavoriteJob {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
-  job  Job  @relation(fields: [jobId], references: [id])
 
   @@unique([userId, jobId])
 }
