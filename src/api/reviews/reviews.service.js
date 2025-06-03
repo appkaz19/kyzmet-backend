@@ -42,7 +42,9 @@ export async function submitReview(userId, data) {
     });
   }
 
-  return { message: 'Review submitted', review };
+  return JSON.parse(JSON.stringify({ message: 'Review submitted', review }, (key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  ));
 }
 
 export async function getReviewsByService(serviceId) {
