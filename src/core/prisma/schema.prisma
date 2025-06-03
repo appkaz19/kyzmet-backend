@@ -152,6 +152,7 @@ model Service {
   title         String
   description   String
   price         Float
+  address       String?
   promotedUntil DateTime?
   createdAt     DateTime  @default(now())
   isDeleted     Boolean   @default(false)

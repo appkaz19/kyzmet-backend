@@ -4,13 +4,13 @@ import { spendFromWallet } from "../wallet/wallet.service.js";
 
 export async function createService(userId, data) {
   const {
-    title, description, price, images = [], videos = [],
+    title, description, price, address, images = [], videos = [],
     regionId, cityId, categoryId, subcategoryId
   } = data;
 
   const service = await prisma.service.create({
     data: {
-      title, description, price, images, videos,
+      title, description, price, address, images, videos,
       regionId, cityId, categoryId, subcategoryId, userId
     }
   });
@@ -29,7 +29,8 @@ export async function getServiceById(id, userId) {
       city: { include: { translations: true } },
       category: { include: { CategoryTranslation: true } },
       subcategory: { include: { SubcategoryTranslation: true } },
-      user: { select: { id: true, phone: true, email: true, fullName: true } }
+      user: { select: { id: true, phone: true, email: true, fullName: true } },
+      address: true
     }
   });
 
@@ -129,7 +130,7 @@ export async function updateService(userId, serviceId, data) {
   if (service.userId !== userId) throw new Error('Unauthorized');
 
   const allowedFields = [
-    'title', 'description', 'price', 'images', 'videos',
+    'title', 'description', 'price', 'address', 'images', 'videos',
     'regionId', 'cityId', 'categoryId', 'subcategoryId'
   ];
 
