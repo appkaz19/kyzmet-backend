@@ -6,7 +6,8 @@ export async function submitReview(req, res) {
     res.json(review);
   } catch (error) {
     console.error('🔥 Submit Review Error:', error);
-    res.status(400).json({ error: error.message });
+    if (error.message === 'Review already submitted for this service') return res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 }
 
