@@ -469,6 +469,86 @@ paths:
           description: Ошибка отправки
         "500":
           description: Ошибка сервера
+  /favorites/services:
+    get:
+      tags:
+        - favorites
+      summary: Получить избранные услуги
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Список избранных услуг
+    post:
+      tags:
+        - favorites
+      summary: Добавить услугу в избранное
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Услуга добавлена в избранное
+    delete:
+      tags:
+        - favorites
+      summary: Удалить услугу из избранного
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Услуга удалена из избранного
+  /favorites/jobs:
+    get:
+      tags:
+        - favorites
+      summary: Получить избранные задания
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Список избранных заданий
+    post:
+      tags:
+        - favorites
+      summary: Добавить задание в избранное
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Задание добавлено в избранное
+    delete:
+      tags:
+        - favorites
+      summary: Удалить задание из избранного
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Задание удалено из избранного
   /jobs:
     get:
       tags:
@@ -737,7 +817,7 @@ paths:
       tags:
         - purchased
       summary: Получить купленные контакты
-      description: Возвращает контакты услуг, приобретенных пользователем
+      description: Возвращает контакты услуг и объявлений, приобретенных пользователем
       security:
         - bearerAuth: []
       responses:
