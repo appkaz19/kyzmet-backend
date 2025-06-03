@@ -87,8 +87,14 @@ export async function buyEmployerContact(userId, jobId) {
     include: { user: { select: { phone: true, email: true } } }
   });
   if (!job) throw new Error('Job not found');
+  const alreadyPurchased = await prisma.purchasedContact.findFirst({
+    where: { userId, jobId }
+  });
 
-  await spendFromWallet(userId, 100);
+  if (!alreadyPurchased) {
+    await spendFromWallet(userId, 100);
+    await prisma.purchasedContact.create({ data: { userId, jobId } });
+  }
 
   return { contact: job.user };
 }

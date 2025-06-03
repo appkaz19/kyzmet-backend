@@ -6,8 +6,17 @@ export async function getByUser(userId) {
     where: { userId },
     select: {
       serviceId: true,
+      jobId: true,
       createdAt: true,
       service: {
+        select: {
+          title: true,
+          user: {
+            select: { phone: true, email: true, fullName: true }
+          }
+        }
+      },
+      job: {
         select: {
           title: true,
           user: {
