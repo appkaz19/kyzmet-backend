@@ -10,7 +10,7 @@ function bigintToString(obj) {
       Object.entries(obj).map(([k, v]) => [k, bigintToString(v)])
     );
   } else if (typeof obj === 'bigint') {
-    return v.toString();
+    return obj.toString(); // Вот тут!
   } else {
     return obj;
   }
