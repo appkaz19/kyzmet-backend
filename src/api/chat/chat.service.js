@@ -76,7 +76,11 @@ export async function getChatMessages(userId, chatId) {
 
 export async function sendMessage(userId, chatId, content) {
   const chat = await prisma.chat.findUnique({
-    where: { id: chatId }
+    where: { id: chatId },
+    include: {
+      userA: true,
+      userB: true
+    }
   });
 
   if (!chat) {
@@ -95,11 +99,11 @@ export async function sendMessage(userId, chatId, content) {
     }
   });
 
-  const recepient = chat.userAId === userId ? chat.userB : chat.userA;
+  const recipient = chat.userAId === userId ? chat.userB : chat.userA;
 
-  if (recepient.pushToken) {
+  if (recipient && recipient.pushToken) {
     await admin.messaging().send({
-      token: recepient.pushToken,
+      token: recipient.pushToken,
       notification: {
         title: '📩 New Message',
         body: content.slice(0, 100),

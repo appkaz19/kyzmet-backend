@@ -22,13 +22,13 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-io.use((sockey, next) => {
-  const token = Socket.handshake.auth?.token;
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
   if (!token) return next(new Error('Auth token required'));
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    Socket.userId = payload.userId;
+    socket.userId = payload.userId;
     next();
   } catch (err) {
     next(new Error('Invalid token'));
@@ -67,7 +67,7 @@ app.use(express.static(path.join(__dirname, "src/pages")));
 
 // Запуск
 const PORT = process.env.PORT || 6969;
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Kyzmet API running at http://localhost:${PORT}`);
   console.log(`📚 Swagger available at http://localhost:${PORT}/api-docs`);
 });
