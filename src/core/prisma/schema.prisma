@@ -57,6 +57,7 @@ model User {
   chatMessages      ChatMessage[]
   purchasedContacts PurchasedContact[]
   Chat              Chat[]
+  reviews           Review[]
 
   @@index([regionId])
   @@index([cityId])
@@ -299,8 +300,10 @@ model Review {
   comment   String
   createdAt DateTime @default(now())
 
+  userId    String
   serviceId BigInt
 
+  user    User    @relation(fields: [userId], references: [id])
   service Service @relation(fields: [serviceId], references: [id])
 
   @@index([createdAt])

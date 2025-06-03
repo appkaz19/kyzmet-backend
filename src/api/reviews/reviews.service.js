@@ -9,6 +9,13 @@ export async function submitReview(userId, data) {
     throw new Error('serviceId and rating are required');
   }
 
+  const existing = await prisma.review.findFirst({
+    where: { userId, serviceId },
+  });
+  if (existing) {
+    throw new Error('Review already submitted for this service');
+  }
+
   const review = await prisma.review.create({
     data: {
       serviceId,
