@@ -2,20 +2,6 @@ import admin from '../../core/firebase.js';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-function bigintToString(obj) {
-  if (Array.isArray(obj)) {
-    return obj.map(bigintToString);
-  } else if (typeof obj === 'object' && obj !== null) {
-    return Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [k, bigintToString(v)])
-    );
-  } else if (typeof obj === 'bigint') {
-    return obj.toString(); // Вот тут!
-  } else {
-    return obj;
-  }
-}
-
 export async function submitReview(userId, data) {
   const { serviceId, rating, comment } = data;
 
@@ -68,5 +54,8 @@ export async function getReviewsByService(serviceId) {
     orderBy: { createdAt: 'desc' },
   });
 
-  return bigintToString(reviews);
+  // Корректная сериализация: bigint -> string, Date -> ISO string
+  return JSON.parse(JSON.stringify(reviews, (key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  ));
 }
