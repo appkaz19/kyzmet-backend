@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+import { serialize } from '../../utils/serialize.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { fixedOtpProvider } from '../../core/otp/index.js';
@@ -17,7 +18,7 @@ export async function register(phone, password) {
   });
 
   await fixedOtpProvider.sendOtp(phone);
-  return { message: 'User registered successfully. OTP sent.', user };
+  return serialize({ message: 'User registered successfully. OTP sent.', user });
 }
 
 export async function verifyOtp(phone, otp) {
@@ -35,11 +36,11 @@ export async function verifyOtp(phone, otp) {
     process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
     { expiresIn: '7d' }
   )
-  return { 
+  return serialize({
     message: 'Phone number verified successfully',
     token,
     user,
-  };
+  });
 }
 
 export async function login(phone, password) {
@@ -57,7 +58,7 @@ export async function login(phone, password) {
     process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
     { expiresIn: '7d' }
   );
-  return { token, user };
+  return serialize({ token, user });
 }
 
 export async function attachGoogle(userId, firebaseGoogleId) {
@@ -70,7 +71,7 @@ export async function attachGoogle(userId, firebaseGoogleId) {
     data: { googleId: firebaseGoogleId }
   });
 
-  return { message: 'Google account attached successfully' };
+  return serialize({ message: 'Google account attached successfully' });
 }
 
 export async function requestResetPassword(phone) {
@@ -79,7 +80,7 @@ export async function requestResetPassword(phone) {
   if (!user) throw new Error('User not found');
 
   await fixedOtpProvider.sendOtp(phone);
-  return { message: 'OTP sent to phone' };
+  return serialize({ message: 'OTP sent to phone' });
 }
 
 export async function verifyResetOtp(phone, otp) {
@@ -95,7 +96,7 @@ export async function verifyResetOtp(phone, otp) {
     process.env.JWT_SECRET,
     { expiresIn: '10m' }
   );
-  return { message: 'OTP verified successfully', otpToken };
+  return serialize({ message: 'OTP verified successfully', otpToken });
 }
 
 export async function resetPassword(payload, newPassword) {
@@ -116,11 +117,11 @@ export async function resetPassword(payload, newPassword) {
     process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
     { expiresIn: '7d' }
   )
-  return { 
+  return serialize({
     message: 'Password reset successfully',
     token,
     user
-  };
+  });
 }
 
 export async function adminLogin(email, password) {
@@ -137,5 +138,5 @@ export async function adminLogin(email, password) {
     { expiresIn: '7d' }
   );
 
-  return { token, admin: { id: admin.id, email: admin.email } };
+  return serialize({ token, admin: { id: admin.id, email: admin.email } });
 }

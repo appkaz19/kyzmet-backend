@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+import { serialize } from '../../utils/serialize.js';
 
 export async function getAllRegions(language = 'ru') {
-  return prisma.region.findMany({
+  const regions = await prisma.region.findMany({
     select: {
       id: true,
       lat: true,
@@ -24,10 +25,11 @@ export async function getAllRegions(language = 'ru') {
       }
     }
   });
+  return serialize(regions);
 }
 
 export async function getCitiesByRegion(regionId, language = 'ru') {
-  return prisma.city.findMany({
+  const cities = await prisma.city.findMany({
     where: { regionId },
     select: {
       id: true,
@@ -39,4 +41,5 @@ export async function getCitiesByRegion(regionId, language = 'ru') {
       }
     }
   });
+  return serialize(cities);
 }

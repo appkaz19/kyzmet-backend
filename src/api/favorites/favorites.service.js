@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+import { serialize } from '../../utils/serialize.js';
 
 export async function addFavoriteService(userId, serviceId) {
   await prisma.favoriteService.upsert({
@@ -25,7 +26,7 @@ export async function getFavoriteServices(userId) {
     include: { user: { select: { fullName: true } } }
   });
   const serviceMap = new Map(services.map(s => [s.id.toString(), s]));
-  return favorites.map(f => {
+  const result = favorites.map(f => {
     const service = serviceMap.get(f.serviceId.toString());
     return service
       ? {
@@ -37,6 +38,7 @@ export async function getFavoriteServices(userId) {
         }
       : null;
   }).filter(Boolean);
+  return serialize(result);
 }
 
 export async function addFavoriteJob(userId, jobId) {
@@ -63,7 +65,7 @@ export async function getFavoriteJobs(userId) {
     include: { user: { select: { fullName: true } } }
   });
   const jobMap = new Map(jobs.map(j => [j.id.toString(), j]));
-  return favorites.map(f => {
+  const resultJobs = favorites.map(f => {
     const job = jobMap.get(f.jobId.toString());
     return job
       ? {
@@ -78,4 +80,5 @@ export async function getFavoriteJobs(userId) {
         }
       : null;
   }).filter(Boolean);
+  return serialize(resultJobs);
 }

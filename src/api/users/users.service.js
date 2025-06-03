@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+import { serialize } from '../../utils/serialize.js';
 
 export async function getUserById(id) {
   const user = await prisma.user.findUnique({
@@ -21,7 +22,7 @@ export async function getUserById(id) {
 
   if (!user) throw new Error('User not found');
 
-  return user;
+  return serialize(user);
 }
 
 export async function updateUser(id, data) {
@@ -66,12 +67,13 @@ export async function updateUser(id, data) {
     }
   });
 
-  return user;
+  return serialize(user);
 }
 
 export async function updatePushToken(userId, pushToken) {
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id: userId },
     data: { pushToken },
   });
+  return serialize(updated);
 }

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
-import { spendFromWallet } from "../wallet/wallet.service.js";
+import { spendFromWallet } from '../wallet/wallet.service.js';
+import { serialize } from '../../utils/serialize.js';
 
 export async function createService(userId, data) {
   const {
@@ -15,11 +16,7 @@ export async function createService(userId, data) {
     }
   });
 
-  return JSON.parse(
-    JSON.stringify(service, (key, value) =>
-      typeof value === 'bigint' ? value.toString() : value
-    )
-  );
+  return serialize(service);
 }
 
 export async function getServiceById(id, userId) {
@@ -45,11 +42,7 @@ export async function getServiceById(id, userId) {
     contact: purchased ? service.user : null
   };
 
-  return JSON.parse(
-    JSON.stringify(result, (key, value) =>
-      typeof value === 'bigint' ? value.toString() : value
-    )
-  );
+  return serialize(result);
 }
 
 export async function getServices(filters = {}) {
@@ -112,15 +105,12 @@ export async function getServices(filters = {}) {
     };
   });
 
-  return JSON.parse(
-    JSON.stringify({
-      total,
-      page: pageNum,
-      limit: take,
-      services: result
-    },
-    (key, value) => typeof value === 'bigint' ? value.toString() : value)
-  );
+  return serialize({
+    total,
+    page: pageNum,
+    limit: take,
+    services: result
+  });
 }
 
 export async function updateService(userId, serviceId, data) {
@@ -138,7 +128,8 @@ export async function updateService(userId, serviceId, data) {
     if (data[field] !== undefined) updateData[field] = data[field];
   }
 
-  return prisma.service.update({ where: { id: serviceId }, data: updateData });
+  const updated = await prisma.service.update({ where: { id: serviceId }, data: updateData });
+  return serialize(updated);
 }
 
 export async function promoteService(userId, serviceId, days) {
