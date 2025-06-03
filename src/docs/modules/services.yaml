@@ -81,6 +81,16 @@
         in: query
         schema:
           type: number
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 20
     responses:
       '200':
         description: Список услуг получен

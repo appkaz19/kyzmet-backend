@@ -53,7 +53,16 @@ export async function getServiceById(id, userId) {
 }
 
 export async function getServices(filters = {}) {
-  const { regionId, cityId, categoryId, subcategoryId, search, price } = filters;
+  const {
+    regionId,
+    cityId,
+    categoryId,
+    subcategoryId,
+    search,
+    price,
+    page = 1,
+    limit = 20,
+  } = filters;
 
   const where = { isDeleted: false };
 
@@ -71,30 +80,45 @@ export async function getServices(filters = {}) {
     where.price = { lte: parseFloat(price) };
   }
 
-  const services = await prisma.service.findMany({
-    where,
-    include: {
-      user: { select: { fullName: true } },
-      reviews: true
-    },
-    orderBy: [{ promotedUntil: 'desc' }, { createdAt: 'desc' }]
+  const take = Number(limit) > 0 ? Number(limit) : 20;
+  const pageNum = Number(page) > 0 ? Number(page) : 1;
+
+  const [total, services] = await Promise.all([
+    prisma.service.count({ where }),
+    prisma.service.findMany({
+      where,
+      include: {
+        user: { select: { fullName: true } },
+        reviews: true
+      },
+      orderBy: [{ promotedUntil: 'desc' }, { createdAt: 'desc' }],
+      skip: (pageNum - 1) * take,
+      take
+    })
+  ]);
+
+  const result = services.map(service => {
+    const ratingSum = (service.reviews || []).reduce((sum, r) => sum + (r.rating || 0), 0);
+    const rating = (service.reviews && service.reviews.length) ? (ratingSum / service.reviews.length).toFixed(1) : null;
+
+    return {
+      id: service.id,
+      title: service.title,
+      price: service.price,
+      image: Array.isArray(service.images) && service.images.length > 0 ? service.images[0] : null,
+      author: service.user && service.user.fullName ? service.user.fullName : '',
+      rating,
+      reviewsCount: (service.reviews || []).length,
+    };
   });
 
   return JSON.parse(
-    JSON.stringify(services.map(service => {
-      const ratingSum = (service.reviews || []).reduce((sum, r) => sum + (r.rating || 0), 0);
-      const rating = (service.reviews && service.reviews.length) ? (ratingSum / service.reviews.length).toFixed(1) : null;
-
-      return {
-        id: service.id,
-        title: service.title,
-        price: service.price,
-        image: Array.isArray(service.images) && service.images.length > 0 ? service.images[0] : null,
-        author: service.user && service.user.fullName ? service.user.fullName : '',
-        rating,
-        reviewsCount: (service.reviews || []).length,
-      };
-    }),
+    JSON.stringify({
+      total,
+      page: pageNum,
+      limit: take,
+      services: result
+    },
     (key, value) => typeof value === 'bigint' ? value.toString() : value)
   );
 }
