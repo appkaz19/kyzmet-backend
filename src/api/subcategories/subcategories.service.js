@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+import { serialize } from '../../utils/serialize.js';
 
 export async function getSubcategoriesByCategory(categoryId, language = 'ru') {
-  return prisma.subcategory.findMany({
+  const subcategories = await prisma.subcategory.findMany({
     where: { categoryId },
     select: {
       id: true,
@@ -12,10 +13,11 @@ export async function getSubcategoriesByCategory(categoryId, language = 'ru') {
       }
     }
   });
+  return serialize(subcategories);
 }
 
 export async function createSubcategory({ categoryId, translations }) {
-  return prisma.subcategory.create({
+  const subcategory = await prisma.subcategory.create({
     data: {
       categoryId,
       SubcategoryTranslation: {
@@ -26,12 +28,13 @@ export async function createSubcategory({ categoryId, translations }) {
       }
     }
   });
+  return serialize(subcategory);
 }
 
 export async function updateSubcategory(id, { translations }) {
   await prisma.subcategoryTranslation.deleteMany({ where: { subcategoryId: id } });
 
-  return prisma.subcategory.update({
+  const updated = await prisma.subcategory.update({
     where: { id },
     data: {
       SubcategoryTranslation: {
@@ -42,6 +45,7 @@ export async function updateSubcategory(id, { translations }) {
       }
     }
   });
+  return serialize(updated);
 }
 
 export async function deleteSubcategory(id) {

@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+import { serialize } from '../../utils/serialize.js';
 
 export async function getByUser(userId) {
-  return prisma.purchasedContact.findMany({
+  const records = await prisma.purchasedContact.findMany({
     where: { userId },
     select: {
       serviceId: true,
@@ -26,4 +27,5 @@ export async function getByUser(userId) {
       }
     }
   });
+  return serialize(records);
 }

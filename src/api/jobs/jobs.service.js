@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 import { spendFromWallet } from '../wallet/wallet.service.js';
+import { serialize } from '../../utils/serialize.js';
 
 export async function createJob(userId, data) {
   const {
@@ -8,13 +9,14 @@ export async function createJob(userId, data) {
       regionId, cityId, address
     } = data;
 
-  return prisma.job.create({
+  const job = await prisma.job.create({
     data: {
       title, description, price,
       images, videos, regionId,
       cityId, address, userId
     }
   });
+  return serialize(job);
 }
 
 export async function getJobs(filters) {
@@ -37,18 +39,17 @@ export async function getJobs(filters) {
     orderBy: [{ promotedUntil: 'desc' }, { createdAt: 'desc' }]
   });
 
-  return jobs.map(job => {
-    return {
-      id: job.id,
-      title: job.title,
-      price: job.price,
-      image: job.images.length > 0 ? job.images[0] : null,
-      author: job.user.fullName ?? 'Аноним',
-      regionId: job.regionId,
-      cityId: job.cityId,
-      address: job.address || 'Не указано'
-    };
-  });
+  const result = jobs.map(job => ({
+    id: job.id,
+    title: job.title,
+    price: job.price,
+    image: job.images.length > 0 ? job.images[0] : null,
+    author: job.user.fullName ?? 'Аноним',
+    regionId: job.regionId,
+    cityId: job.cityId,
+    address: job.address || 'Не указано'
+  }));
+  return serialize(result);
 }
 
 export async function getJobById(id) {
@@ -62,7 +63,7 @@ export async function getJobById(id) {
   });
 
   if (!job) throw new Error('Job not found');
-  return job;
+  return serialize(job);
 }
 
 export async function promoteJob(userId, jobId, days) {

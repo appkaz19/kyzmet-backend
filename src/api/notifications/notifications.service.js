@@ -1,13 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import admin from '../../core/firebase.js';
+import { serialize } from '../../utils/serialize.js';
 const messaging = admin.messaging();
 const prisma = new PrismaClient();
 
 export async function getUserNotifications(userId) {
-  return prisma.notification.findMany({
+  const notifications = await prisma.notification.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
   });
+  return serialize(notifications);
 }
 
 export async function getUnreadCount(userId) {
@@ -17,17 +19,19 @@ export async function getUnreadCount(userId) {
 }
 
 export async function markAsRead(userId, notificationId) {
-  return prisma.notification.updateMany({
+  const result = await prisma.notification.updateMany({
     where: { id: notificationId, userId },
     data: { isRead: true },
   });
+  return serialize(result);
 }
 
 export async function markAllAsRead(userId) {
-  return prisma.notification.updateMany({
+  const result = await prisma.notification.updateMany({
     where: { userId, isRead: false },
     data: { isRead: true },
   });
+  return serialize(result);
 }
 
 export async function sendPushNotification(token, title, body, data = {}) {

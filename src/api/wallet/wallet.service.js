@@ -1,5 +1,6 @@
 import admin from '../../core/firebase.js';
 import { PrismaClient } from '@prisma/client';
+import { serialize } from '../../utils/serialize.js';
 const prisma = new PrismaClient();
 
 export async function getMyWallet(userId) {
@@ -14,7 +15,7 @@ export async function getMyWallet(userId) {
     });
   }
 
-  return wallet;
+  return serialize(wallet);
 }
 
 export async function topUpWallet(userId, amount) {
@@ -48,7 +49,7 @@ export async function topUpWallet(userId, amount) {
     });
   }
 
-  return wallet;
+  return serialize(wallet);
 }
 
 export async function spendFromWallet(userId, amount) {
@@ -57,7 +58,7 @@ export async function spendFromWallet(userId, amount) {
   const wallet = await getMyWallet(userId);
   if (wallet.balance < amount) throw new Error('Insufficient balance');
 
-  return await prisma.wallet.update({
+  const updated = await prisma.wallet.update({
     where: { id: wallet.id },
     data: {
       balance: { decrement: amount },
@@ -67,4 +68,5 @@ export async function spendFromWallet(userId, amount) {
     },
     include: { transactions: true }
   });
+  return serialize(updated);
 }

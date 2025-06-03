@@ -1,5 +1,6 @@
 import admin from '../../core/firebase.js';
 import { PrismaClient } from '@prisma/client';
+import { serialize } from '../../utils/serialize.js';
 const prisma = new PrismaClient();
 
 export async function startChat(userId, targetUserId) {
@@ -25,7 +26,7 @@ export async function startChat(userId, targetUserId) {
     });
   }
 
-  return chat;
+  return serialize(chat);
 }
 
 export async function getMyChats(userId) {
@@ -49,7 +50,7 @@ export async function getMyChats(userId) {
     }
   });
 
-  return chats;
+  return serialize(chats);
 }
 
 export async function getChatMessages(userId, chatId) {
@@ -70,7 +71,7 @@ export async function getChatMessages(userId, chatId) {
     orderBy: { createdAt: 'asc' }
   });
 
-  return messages;
+  return serialize(messages);
 }
 
 export async function sendMessage(userId, chatId, content) {
@@ -110,5 +111,5 @@ export async function sendMessage(userId, chatId, content) {
     });
   }
 
-  return message;
+  return serialize(message);
 }

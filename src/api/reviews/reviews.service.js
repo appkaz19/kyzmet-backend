@@ -1,5 +1,6 @@
 import admin from '../../core/firebase.js';
 import { PrismaClient } from '@prisma/client';
+import { serialize } from '../../utils/serialize.js';
 const prisma = new PrismaClient();
 
 export async function submitReview(userId, data) {
@@ -42,9 +43,7 @@ export async function submitReview(userId, data) {
     });
   }
 
-  return JSON.parse(JSON.stringify({ message: 'Review submitted', review }, (key, value) =>
-    typeof value === 'bigint' ? value.toString() : value
-  ));
+  return serialize({ message: 'Review submitted', review });
 }
 
 export async function getReviewsByService(serviceId) {
@@ -57,7 +56,5 @@ export async function getReviewsByService(serviceId) {
   });
 
   // Корректная сериализация: bigint -> string, Date -> ISO string
-  return JSON.parse(JSON.stringify(reviews, (key, value) =>
-    typeof value === 'bigint' ? value.toString() : value
-  ));
+  return serialize(reviews);
 }
