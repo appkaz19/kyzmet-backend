@@ -25,16 +25,6 @@ export async function submitReview(userId, data) {
     },
   });
 
-  const avgRating = await prisma.review.aggregate({
-    where: { serviceId },
-    _avg: { rating: true },
-  });
-
-  await prisma.service.update({
-    where: { id: serviceId },
-    data: { rating: avgRating._avg.rating || 0 },
-  });
-
   const recepient = await prisma.user.findUnique({
     where: { id: userId }
   });
