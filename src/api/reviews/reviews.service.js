@@ -2,6 +2,20 @@ import admin from '../../core/firebase.js';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+function bigintToString(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(bigintToString);
+  } else if (typeof obj === 'object' && obj !== null) {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, bigintToString(v)])
+    );
+  } else if (typeof obj === 'bigint') {
+    return v.toString();
+  } else {
+    return obj;
+  }
+}
+
 export async function submitReview(userId, data) {
   const { serviceId, rating, comment } = data;
 
@@ -46,11 +60,13 @@ export async function submitReview(userId, data) {
 }
 
 export async function getReviewsByService(serviceId) {
-  return prisma.review.findMany({
+  const reviews = await prisma.review.findMany({
     where: { serviceId },
     include: {
       user: { select: { email: true, fullName: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
+
+  return bigintToString(reviews);
 }
