@@ -159,7 +159,6 @@ model Service {
   isDeleted     Boolean   @default(false)
 
   images String[] // Массив URL картинок
-  videos String[] // Массив URL видео
 
   userId        String
   regionId      String?
@@ -196,7 +195,6 @@ model Job {
   isDeleted     Boolean   @default(false)
 
   images String[] // Массив URL картинок
-  videos String[] // Массив URL видео
 
   userId   String
   regionId String?

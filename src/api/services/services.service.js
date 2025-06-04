@@ -5,13 +5,13 @@ import { serialize } from '../../utils/serialize.js';
 
 export async function createService(userId, data) {
   const {
-    title, description, price, address, images = [], videos = [],
+    title, description, price, address, images = [],
     regionId, cityId, categoryId, subcategoryId
   } = data;
 
   const service = await prisma.service.create({
     data: {
-      title, description, price, address, images, videos,
+      title, description, price, address, images,
       regionId, cityId, categoryId, subcategoryId, userId
     }
   });
@@ -119,7 +119,7 @@ export async function updateService(userId, serviceId, data) {
   if (service.userId !== userId) throw new Error('Unauthorized');
 
   const allowedFields = [
-    'title', 'description', 'price', 'address', 'images', 'videos',
+    'title', 'description', 'price', 'address', 'images',
     'regionId', 'cityId', 'categoryId', 'subcategoryId'
   ];
 

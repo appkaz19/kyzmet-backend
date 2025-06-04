@@ -601,10 +601,6 @@ paths:
                   type: array
                   items:
                     type: string
-                videos:
-                  type: array
-                  items:
-                    type: string
                 regionId:
                   type: string
                 cityId:
@@ -902,10 +898,6 @@ paths:
                 price:
                   type: number
                 images:
-                  type: array
-                  items:
-                    type: string
-                videos:
                   type: array
                   items:
                     type: string

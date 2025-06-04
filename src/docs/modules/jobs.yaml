@@ -51,10 +51,6 @@
                 type: array
                 items:
                   type: string
-              videos:
-                type: array
-                items:
-                  type: string
               regionId:
                 type: string
               cityId:
