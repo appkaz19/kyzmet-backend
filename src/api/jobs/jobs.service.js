@@ -33,7 +33,7 @@ export async function getJobs(filters) {
   }
   if (price) where.price = { lte: parseFloat(price) };
 
-  const jobs = await prisma.jobPost.findMany({
+  const jobs = await prisma.job.findMany({
     where,
     include: { user: { select: { fullName: true } } },
     orderBy: [{ promotedUntil: 'desc' }, { createdAt: 'desc' }]
