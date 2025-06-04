@@ -4,7 +4,7 @@ export async function register(req, res) {
   try {
     const { phone, password } = req.body;
     const result = await authService.register(phone, password);
-    console.log('✅ [auth] User registered:', result.user?.id);
+    console.log('✅ [auth] User registered:', result.user.id);
     res.json(result);
   } catch (error) {
     console.error('🔥 Register error:', error);
@@ -17,7 +17,7 @@ export async function verifyOtp(req, res) {
   try {
     const { phone, otp } = req.body;
     const result = await authService.verifyOtp(phone, otp);
-    console.log('✅ [auth] OTP verified:', result.user?.id);
+    console.log('✅ [auth] OTP verified for user:', result.user.id);
     res.json(result);
   } catch (error) {
     console.error('🔥 Verify OTP error:', error);
@@ -29,7 +29,7 @@ export async function login(req, res) {
   try {
     const { phone, password } = req.body;
     const result = await authService.login(phone, password);
-    console.log('✅ [auth] User logined:', result.user?.id);
+    console.log('✅ [auth] User logged in:', result.user.id);
     res.json(result);
   } catch (error) {
     console.error('🔥 Login error:', error);
@@ -43,7 +43,7 @@ export async function attachGoogle(req, res) {
     const userId = req.user.userId;
     const { firebaseGoogleId } = req.body;
     const result = await authService.attachGoogle(userId, firebaseGoogleId);
-    console.log('✅ [auth] Google attached:', result.user?.id);
+    console.log('✅ [auth] Google attached for user:', userId);
     res.json(result);
   } catch (error) {
     console.error('🔥 Attach Google error:', error);
@@ -55,7 +55,7 @@ export async function requestResetPassword(req, res) {
   try {
     const { phone } = req.body;
     const result = await authService.requestResetPassword(phone);
-    console.log('✅ [auth] Password reset requested:', result.user?.id);
+    console.log('✅ [auth] Password reset requested for phone:', phone);
     res.json(result);
   } catch (error) {
     console.error('🔥 Request Reset Password error:', error);
@@ -67,7 +67,7 @@ export async function verifyResetOtp(req, res) {
   try {
     const { phone, otp } = req.body;
     const result = await authService.verifyResetOtp(phone, otp);
-    console.log('✅ [auth] User registered:', result.user?.id);
+    console.log('✅ [auth] Reset OTP verified for phone:', phone);
     res.json(result);
   } catch (error) {
     console.error('🔥 Verify Reset OTP error:', error);
@@ -81,7 +81,7 @@ export async function resetPassword(req, res) {
   try {
     const { newPassword } = req.body;
     const result = await authService.resetPassword(req.otp, newPassword);
-    console.log('✅ [auth] Password resetted:', result.user?.id);
+    console.log('✅ [auth] Password reset for user:', result.user.id);
     res.json(result);
   } catch (error) {
     console.error('🔥 Reset Password error:', error);
