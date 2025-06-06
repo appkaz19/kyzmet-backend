@@ -46,6 +46,7 @@ model User {
   jobs          Job[]
   notifications Notification[]
   wallet        Wallet?
+  paymentMethods PaymentMethod[]
   
   favoriteJobs     FavoriteJob[]
   favoriteServices FavoriteService[]
@@ -276,10 +277,33 @@ model Wallet {
   transactions Transaction[]
 }
 
+model PaymentMethod {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String
+  last4       String
+  cardType    String
+  expiryMonth Int
+  expiryYear  Int
+  cardHolder  String
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  providerType String
+  providerId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payment_methods")
+}
+
 model Transaction {
   id        BigInt          @id @default(autoincrement())
   amount    Float
   type      TransactionType
+  description String?
+  metadata  Json?
   createdAt DateTime        @default(now())
   walletId  String
 
@@ -291,6 +315,7 @@ enum TransactionType {
   SPEND
   REFUND
   BONUS
+  TOP_UP_FAILED
 }
 
 model Review {
