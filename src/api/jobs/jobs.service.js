@@ -99,3 +99,22 @@ export async function buyEmployerContact(userId, jobId) {
 
   return { contact: job.user };
 }
+
+export async function getMyJobs(userId) {
+  const jobs = await prisma.job.findMany({
+    where: { userId, isDeleted: false },
+    orderBy: [{ promotedUntil: 'desc' }, { createdAt: 'desc' }]
+  });
+
+  const result = jobs.map(job => ({
+    id: job.id,
+    title: job.title,
+    price: job.price,
+    image: job.images.length > 0 ? job.images[0] : null,
+    regionId: job.regionId,
+    cityId: job.cityId,
+    address: job.address || 'Не указано'
+  }));
+
+  return serialize(result);
+}

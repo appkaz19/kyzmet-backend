@@ -22,4 +22,7 @@ router.post('/:id/promote', authMiddleware, serviceController.promoteService);
 // Buy provider contact
 router.post('/:id/contact', authMiddleware, serviceController.buyProviderContact);
 
+// Get current user's services
+router.get('/my', authMiddleware, serviceController.getMyServices);
+
 export default router;

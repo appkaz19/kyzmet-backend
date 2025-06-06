@@ -19,4 +19,7 @@ router.post('/:id/promote', authMiddleware, jobController.promoteJob);
 // Купить контакт нанимателя
 router.post('/:id/contact', authMiddleware, jobController.buyEmployerContact);
 
+// Получить свои объявления
+router.get('/my', authMiddleware, jobController.getMyJobs);
+
 export default router;

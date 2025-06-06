@@ -150,3 +150,19 @@
         description: Задание не найдено
       '500':
         description: Ошибка сервера
+
+/jobs/my:
+  get:
+    tags:
+      - jobs
+    summary: Получить мои объявления
+    description: Возвращает список объявлений текущего пользователя
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Список моих объявлений
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера

@@ -60,3 +60,13 @@ export async function buyProviderContact(req, res) {
     res.status(400).json({ error: error.message });
   }
 }
+
+export async function getMyServices(req, res) {
+  try {
+    const result = await serviceService.getMyServices(req.user.userId);
+    res.json(result);
+  } catch (error) {
+    console.error('🔥 Get My Services error:', error);
+    res.status(500).json({ error: 'Failed to fetch my services' });
+  }
+}

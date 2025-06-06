@@ -50,3 +50,13 @@ export async function buyEmployerContact(req, res) {
     res.status(500).json({ error: 'Failed to buy employer contact' });
   }
 }
+
+export async function getMyJobs(req, res) {
+  try {
+    const result = await jobService.getMyJobs(req.user.userId);
+    res.json(result);
+  } catch (error) {
+    console.error('🔥 Get My Jobs error:', error);
+    res.status(500).json({ error: 'Failed to fetch my jobs' });
+  }
+}

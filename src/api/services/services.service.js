@@ -158,3 +158,26 @@ export async function buyProviderContact(userId, serviceId) {
 
   return getServiceById(serviceId, userId);
 }
+
+export async function getMyServices(userId) {
+  const services = await prisma.service.findMany({
+    where: { userId, isDeleted: false },
+    include: { reviews: true }
+  });
+
+  const result = services.map((service) => {
+    const ratingSum = (service.reviews || []).reduce((sum, r) => sum + (r.rating || 0), 0);
+    const rating = service.reviews && service.reviews.length ? (ratingSum / service.reviews.length).toFixed(1) : null;
+
+    return {
+      id: service.id,
+      title: service.title,
+      price: service.price,
+      image: Array.isArray(service.images) && service.images.length > 0 ? service.images[0] : null,
+      rating,
+      reviewsCount: (service.reviews || []).length
+    };
+  });
+
+  return serialize(result);
+}

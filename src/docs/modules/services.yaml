@@ -147,3 +147,19 @@
         description: Ошибка
       '500':
         description: Ошибка сервера
+
+/services/my:
+  get:
+    tags:
+      - services
+    summary: Получить мои услуги
+    description: Возвращает список услуг текущего пользователя
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Список моих услуг
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
