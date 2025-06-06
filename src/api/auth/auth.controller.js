@@ -34,6 +34,7 @@ export async function login(req, res) {
   } catch (error) {
     console.error('🔥 Login error:', error);
     if (error.message === 'Invalid credentials') return res.status(401).json({ error: error.message });
+    if (error.message === 'User not verified') return res.status(403).json({ error: error.message });
     res.status(500).json({ error: 'Internal server error' });
   }
 }

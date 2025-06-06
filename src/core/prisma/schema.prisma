@@ -32,6 +32,7 @@ model User {
   lastLoginAt  DateTime?
   lastSeenAt   DateTime?
   isDeleted    Boolean   @default(false)
+  verified     Boolean   @default(false)
 
   pushToken    String?
 

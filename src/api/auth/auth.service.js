@@ -14,7 +14,7 @@ export async function register(phone, password) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { phone, passwordHash }
+    data: { phone, passwordHash, verified: false }
   });
 
   await fixedOtpProvider.sendOtp(phone);
@@ -31,6 +31,11 @@ export async function verifyOtp(phone, otp) {
 
   if (!user) throw new Error('User not found');
 
+  await prisma.user.update({
+    where: { phone },
+    data: { verified: true }
+  });
+
   const token = jwt.sign(
     { userId: user.id },
     process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
@@ -39,7 +44,7 @@ export async function verifyOtp(phone, otp) {
   return serialize({
     message: 'Phone number verified successfully',
     token,
-    user,
+    user: { ...user, verified: true },
   });
 }
 
@@ -49,6 +54,7 @@ export async function login(phone, password) {
   });
 
   if (!user) throw new Error('Invalid credentials');
+  if (!user.verified) throw new Error('User not verified');
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
   if (!isPasswordValid) throw new Error('Invalid credentials');

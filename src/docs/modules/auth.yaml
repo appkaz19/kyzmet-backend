@@ -3,7 +3,7 @@
     tags:
       - auth
     summary: Регистрация нового пользователя
-    description: Регистрирует нового пользователя по номеру телефона и паролю
+    description: Регистрирует нового пользователя по номеру телефона и паролю и отправляет код подтверждения
     requestBody:
       required: true
       content:
@@ -20,7 +20,7 @@
               - password
     responses:
       '200':
-        description: Успешная регистрация
+        description: Пользователь создан, OTP отправлен
       '400':
         description: Ошибка данных
       '500':
@@ -31,7 +31,7 @@
     tags:
       - auth
     summary: Подтверждение регистрации через OTP
-    description: Подтверждает номер телефона через код OTP
+    description: Подтверждает номер телефона через код OTP и активирует аккаунт
     requestBody:
       required: true
       content:
