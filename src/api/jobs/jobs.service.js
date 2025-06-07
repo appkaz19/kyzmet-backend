@@ -73,8 +73,6 @@ export async function getJobById(id) {
       region: { include: { translations: true } },
       city: { include: { translations: true } },
       user: { select: { id: true, phone: true, email: true, fullName: true } },
-      allowChat,
-      allowPhone,
     }
   });
 
