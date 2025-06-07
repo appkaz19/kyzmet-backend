@@ -5,15 +5,29 @@ import { serialize } from '../../utils/serialize.js';
 
 export async function createJob(userId, data) {
   const {
-      title, description, price, images = [],
-      regionId, cityId, address
+      title,
+      description,
+      price,
+      images = [],
+      regionId,
+      cityId,
+      address,
+      allowChat = true,
+      allowPhone = true
     } = data;
 
   const job = await prisma.job.create({
     data: {
-      title, description, price,
-      images, regionId,
-      cityId, address, userId
+      title,
+      description,
+      price,
+      images,
+      regionId,
+      cityId,
+      address,
+      allowChat,
+      allowPhone,
+      userId
     }
   });
   return serialize(job);

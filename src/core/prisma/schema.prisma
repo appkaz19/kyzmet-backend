@@ -162,6 +162,7 @@ model Service {
 
   images String[] // Массив URL картинок
 
+
   userId        String
   regionId      String?
   cityId        String?
@@ -197,6 +198,9 @@ model Job {
   isDeleted     Boolean   @default(false)
 
   images String[] // Массив URL картинок
+
+  allowChat  Boolean @default(true)
+  allowPhone Boolean @default(true)
 
   userId   String
   regionId String?
