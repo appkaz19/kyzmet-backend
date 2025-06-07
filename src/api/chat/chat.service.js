@@ -42,8 +42,8 @@ export async function getMyChats(userId) {
         orderBy: { createdAt: 'desc' },
         take: 1
       },
-      userA: { select: { id: true, phone: true, email: true } },
-      userB: { select: { id: true, phone: true, email: true } }
+      userA: { select: { id: true, phone: true, email: true, fullName: true, avatarUrl: true } },
+      userB: { select: { id: true, phone: true, email: true, fullName: true, avatarUrl: true } }
     },
     orderBy: {
       updatedAt: 'desc'
