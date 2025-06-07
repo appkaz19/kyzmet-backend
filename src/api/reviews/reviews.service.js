@@ -26,21 +26,29 @@ export async function submitReview(userId, data) {
     },
   });
 
-  const recepient = await prisma.user.findUnique({
-    where: { id: userId }
+  const service = await prisma.service.findUnique({
+    where: { id: serviceId },
+    select: { userId: true },
   });
 
-  if (recepient?.pushToken) {
-    await admin.messaging().send({
-      token: recepient.pushToken,
-      notification: {
-        title: '⭐ New Review',
-        body: `You received a new review: ${text.slice(0, 100)}`,
-      },
-      data: {
-        type: 'review',
-      }
+  if (service) {
+    const recipient = await prisma.user.findUnique({
+      where: { id: service.userId },
     });
+
+    if (recipient?.pushToken) {
+      await admin.messaging().send({
+        token: recipient.pushToken,
+        notification: {
+          title: '⭐ Новый отзыв',
+          body: `Вы получили новый отзыв: ${comment?.slice(0, 100) ?? ''}`,
+        },
+        data: {
+          type: 'review',
+          serviceId: serviceId.toString(),
+        },
+      });
+    }
   }
 
   return serialize({ message: 'Review submitted', review });
