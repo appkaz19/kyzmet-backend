@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Job" ADD COLUMN     "allowChat" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "allowPhone" BOOLEAN NOT NULL DEFAULT true;
