@@ -67,3 +67,29 @@
         description: Пользователь не найден
       '500':
         description: Ошибка сервера
+
+/users/push-token:
+  post:
+    tags:
+      - users
+    summary: Сохранить FCM токен пользователя
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pushToken:
+                type: string
+            required:
+              - pushToken
+    responses:
+      '200':
+        description: Токен сохранен
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера

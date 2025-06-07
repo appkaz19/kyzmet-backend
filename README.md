@@ -39,6 +39,23 @@ docker-compose up --build
 docker exec -it <postgres-container> psql -U <user> -d <db> -f /init-db/init.sql
 ```
 
+### 5. Настройка Firebase уведомлений
+
+- Заполните переменные `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` и
+  `FIREBASE_PRIVATE_KEY` в `.env`. Эти данные можно получить из сервисного
+  аккаунта Firebase.
+- После получения FCM-токена на клиенте отправьте его запросом `POST
+  /users/push-token` с заголовком авторизации `Bearer <jwt>`:
+
+```bash
+curl -X POST /users/push-token \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"pushToken": "<FCM_TOKEN>"}'
+```
+
+Полученный токен будет использоваться бэкендом для отправки push-уведомлений.
+
 ## 📁 Структура проекта
 
 ```
