@@ -61,7 +61,7 @@ export async function getJobs(filters) {
     author: job.user.fullName ?? 'Аноним',
     regionId: job.regionId,
     cityId: job.cityId,
-    address: job.address || 'Не указано'
+    address: job.address || 'Не указано',
   }));
   return serialize(result);
 }
@@ -72,7 +72,9 @@ export async function getJobById(id) {
     include: {
       region: { include: { translations: true } },
       city: { include: { translations: true } },
-      user: { select: { id: true, phone: true, email: true, fullName: true } }
+      user: { select: { id: true, phone: true, email: true, fullName: true } },
+      allowChat,
+      allowPhone,
     }
   });
 
