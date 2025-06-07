@@ -21,6 +21,9 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*' }
 });
+// Сделаем экземпляр io доступным глобально, чтобы можно было
+// отправлять сообщения из HTTP контроллеров
+global.io = io;
 
 io.use((sockey, next) => {
   const token = Socket.handshake.auth?.token;
