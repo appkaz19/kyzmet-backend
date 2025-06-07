@@ -94,6 +94,18 @@ export async function sendMessage(userId, chatId, content) {
     }
   });
 
+  // После сохранения сообщения рассылаем его через WebSocket,
+  // если Socket.IO инициализирован (используем глобальную переменную)
+  if (global.io) {
+    global.io.to(chatId).emit('newMessage', {
+      id: message.id,
+      chatId,
+      senderId: userId,
+      content,
+      createdAt: message.createdAt
+    });
+  }
+
   const recepient = chat.userAId === userId ? chat.userB : chat.userA;
 
   if (recepient.pushToken) {
