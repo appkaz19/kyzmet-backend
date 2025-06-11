@@ -13,6 +13,8 @@ import loadRoutes from "./src/api/index.js";
 import swaggerUi from "swagger-ui-express";
 import path from "path";
 
+import { setSocketIO } from "./src/api/chat/chat.service.js"
+
 // Инициализация сервера
 const app = express();
 
@@ -21,6 +23,9 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*' }
 });
+
+setSocketIO(io);
+console.log('✅ Socket.IO instance передан в chat.service.js');
 
 io.use((socket, next) => {
   const token = socket.handshake.auth?.token;

@@ -16,4 +16,6 @@ router.get('/:chatId/messages', authMiddleware, chatController.getChatMessages);
 // Отправить сообщение
 router.post('/:chatId/messages', authMiddleware, chatController.sendMessage);
 
+router.post('/:chatId/mark-read', authMiddleware, chatController.markChatAsRead);
+
 export default router;

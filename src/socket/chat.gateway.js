@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { serialize } from '../utils/serialize.js';
 const prisma = new PrismaClient();
 
 export function handleSocketConnection(io, socket) {
@@ -22,13 +23,15 @@ export function handleSocketConnection(io, socket) {
                 data: { chatId, senderId: userId, content }
             });
 
-            io.to(chatId).emit('newMessage', {
+            const websocketMessage = serialize({
                 id: message.id,
                 chatId,
                 senderId: userId,
                 content,
                 createdAt: message.createdAt
             });
+
+            io.to(chatId).emit('newMessage', websocketMessage);
 
             console.log(`✉️ Message sent in ${chatId} by ${userId}`);
         } catch (err) {

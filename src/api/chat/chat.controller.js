@@ -47,3 +47,15 @@ export async function sendMessage(req, res) {
     res.status(500).json({ error: 'Failed to send message' });
   }
 }
+
+export async function markChatAsRead(req, res) {
+  try {
+    const userId = req.user.userId;
+    const chatId = req.params.chatId;
+    const result = await chatService.markChatAsRead(userId, chatId);
+    res.json(result);
+  } catch (error) {
+    console.error('🔥 Mark Chat As Read error:', error);
+    res.status(500).json({ error: 'Failed to mark chat as read' });
+  }
+}
