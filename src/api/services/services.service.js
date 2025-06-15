@@ -12,7 +12,8 @@ export async function createService(userId, data) {
   const service = await prisma.service.create({
     data: {
       title, description, price, address, images,
-      regionId, cityId, categoryId, subcategoryId, userId
+      regionId, cityId, categoryId, subcategoryId, userId,
+      expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
     }
   });
 
@@ -57,7 +58,7 @@ export async function getServices(filters = {}) {
     limit = 20,
   } = filters;
 
-  const where = { isDeleted: false };
+  const where = { isDeleted: false, expiresAt: { gte: new Date() } };
 
   if (regionId) where.regionId = regionId;
   if (cityId) where.cityId = cityId;
@@ -132,20 +133,27 @@ export async function updateService(userId, serviceId, data) {
   return serialize(updated);
 }
 
-export async function promoteService(userId, serviceId, days) {
+export async function promoteService(userId, serviceId, tariffId) {
   const service = await prisma.service.findUnique({ where: { id: serviceId } });
   if (!service) throw new Error('Service not found');
   if (service.userId !== userId) throw new Error('Unauthorized');
 
-  const cost = days === 7 ? 500 : 300;
-  await spendFromWallet(userId, cost);
+  const tariff = await prisma.tariff.findFirst({ where: { id: tariffId, isActive: true } });
+  if (!tariff) throw new Error('Tariff not found');
 
-  const promotedUntil = new Date();
-  promotedUntil.setDate(promotedUntil.getDate() + (days === 7 ? 7 : 3));
+  if (tariff.price > 0) {
+    await spendFromWallet(userId, tariff.price);
+  }
 
-  await prisma.service.update({ where: { id: serviceId }, data: { promotedUntil } });
+  let promotedUntil = service.promotedUntil && service.promotedUntil > new Date() ? new Date(service.promotedUntil) : new Date();
+  promotedUntil.setDate(promotedUntil.getDate() + tariff.promoDays);
 
-  return { message: `Service promoted for ${days} days.` };
+  const expiresAt = new Date(service.expiresAt);
+  expiresAt.setDate(expiresAt.getDate() + tariff.extraDays);
+
+  await prisma.service.update({ where: { id: serviceId }, data: { promotedUntil, expiresAt } });
+
+  return { message: `Service promoted with tariff ${tariff.name}.` };
 }
 
 export async function buyProviderContact(userId, serviceId) {
