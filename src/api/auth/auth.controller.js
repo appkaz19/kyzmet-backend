@@ -13,17 +13,6 @@ export async function register(req, res) {
   }
 }
 
-export async function verifyOtp(req, res) {
-  try {
-    const { phone, otp } = req.body;
-    const result = await authService.verifyOtp(phone, otp);
-    console.log('✅ [auth] OTP verified for user:', result.user.id);
-    res.json(result);
-  } catch (error) {
-    console.error('🔥 Verify OTP error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-}
 
 export async function login(req, res) {
   try {
@@ -52,36 +41,11 @@ export async function attachGoogle(req, res) {
   }
 }
 
-export async function requestResetPassword(req, res) {
-  try {
-    const { phone } = req.body;
-    const result = await authService.requestResetPassword(phone);
-    console.log('✅ [auth] Password reset requested for phone:', phone);
-    res.json(result);
-  } catch (error) {
-    console.error('🔥 Request Reset Password error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-}
-
-export async function verifyResetOtp(req, res) {
-  try {
-    const { phone, otp } = req.body;
-    const result = await authService.verifyResetOtp(phone, otp);
-    console.log('✅ [auth] Reset OTP verified for phone:', phone);
-    res.json(result);
-  } catch (error) {
-    console.error('🔥 Verify Reset OTP error:', error);
-    if (error.message === 'User not found') return res.status(404).json({ message: error.message });
-    if (error.message === 'Invalid OTP') return res.status(400).json({ message: error.message });
-    res.status(500).json({ message: 'Internal server error' });
-  }
-}
 
 export async function resetPassword(req, res) {
   try {
-    const { newPassword } = req.body;
-    const result = await authService.resetPassword(req.otp, newPassword);
+    const { phone, newPassword } = req.body;
+    const result = await authService.resetPassword(phone, newPassword);
     console.log('✅ [auth] Password reset for user:', result.user.id);
     res.json(result);
   } catch (error) {

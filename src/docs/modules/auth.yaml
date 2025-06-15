@@ -3,7 +3,7 @@
     tags:
       - auth
     summary: Регистрация нового пользователя
-    description: Регистрирует нового пользователя по номеру телефона и паролю и отправляет код подтверждения
+    description: Создаёт пользователя по номеру телефона и паролю без отправки OTP
     requestBody:
       required: true
       content:
@@ -20,39 +20,12 @@
               - password
     responses:
       '200':
-        description: Пользователь создан, OTP отправлен
+        description: Пользователь создан
       '400':
         description: Ошибка данных
       '500':
         description: Ошибка сервера
 
-/auth/verify-otp:
-  post:
-    tags:
-      - auth
-    summary: Подтверждение регистрации через OTP
-    description: Подтверждает номер телефона через код OTP и активирует аккаунт
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              phone:
-                type: string
-              otp:
-                type: string
-            required:
-              - phone
-              - otp
-    responses:
-      '200':
-        description: Телефон подтвержден
-      '400':
-        description: Неверный код
-      '500':
-        description: Ошибка сервера
 
 /auth/login:
   post:
@@ -109,76 +82,13 @@
       '500':
         description: Ошибка сервера
 
-/auth/verify-reset-otp:
-  post:
-    tags:
-      - auth
-    summary: Подтверждение OTP для сброса пароля
-    description: Проверяет OTP и возвращает временный JWT-токен для дальнейшего сброса пароля
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              phone:
-                type: string
-              otp:
-                type: string
-            required:
-              - phone
-              - otp
-    responses:
-      '200':
-        description: Успешная проверка, возвращён временный токен
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                otpToken:
-                  type: string
-      '400':
-        description: Неверный код
-      '404':
-        description: Пользователь не найден
-      '500':
-        description: Ошибка сервера
-
-/auth/request-reset-password:
-  post:
-    tags:
-      - auth
-    summary: Запрос сброса пароля
-    description: Отправляет OTP код на телефон для сброса пароля
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              phone:
-                type: string
-            required:
-              - phone
-    responses:
-      '200':
-        description: Код отправлен
-      '400':
-        description: Ошибка запроса
-      '500':
-        description: Ошибка сервера
 
 /auth/reset-password:
   post:
     tags:
       - auth
     summary: Сброс пароля
-    description: Сброс пароля через временный OTP токен, полученный после верификации
-    security:
-      - bearerAuth: []  # JWT-токен, полученный из /verify-reset-otp
+    description: Сброс пароля по номеру телефона
     requestBody:
       required: true
       content:
@@ -186,15 +96,18 @@
           schema:
             type: object
             properties:
+              phone:
+                type: string
               newPassword:
                 type: string
             required:
+              - phone
               - newPassword
     responses:
       '200':
         description: Пароль успешно изменен
-      '401':
-        description: Отсутствует или неверный OTP токен
+      '400':
+        description: Пользователь не найден
       '500':
         description: Ошибка сервера
 

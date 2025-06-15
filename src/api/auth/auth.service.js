@@ -3,7 +3,6 @@ const prisma = new PrismaClient();
 import { serialize } from '../../utils/serialize.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { fixedOtpProvider } from '../../core/otp/index.js';
 
 export async function register(phone, password) {
   const existingUser = await prisma.user.findFirst({
@@ -14,39 +13,12 @@ export async function register(phone, password) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { phone, passwordHash, verified: false }
+    data: { phone, passwordHash, verified: true }
   });
 
-  await fixedOtpProvider.sendOtp(phone);
-  return serialize({ message: 'User registered successfully. OTP sent.', user });
+  return serialize({ message: 'User registered successfully.', user });
 }
 
-export async function verifyOtp(phone, otp) {
-  const isValid = await fixedOtpProvider.verifyOtp(phone, otp);
-  if (!isValid) throw new Error('Invalid OTP');
-
-  const user = await prisma.user.findUnique({
-    where: { phone }
-  });
-
-  if (!user) throw new Error('User not found');
-
-  await prisma.user.update({
-    where: { phone },
-    data: { verified: true }
-  });
-
-  const token = jwt.sign(
-    { userId: user.id },
-    process.env.JWT_SECRET || 'SECRET_KEY', // Использовать нормальный секрет на проде
-    { expiresIn: '7d' }
-  )
-  return serialize({
-    message: 'Phone number verified successfully',
-    token,
-    user: { ...user, verified: true },
-  });
-}
 
 export async function login(phone, password) {
   const user = await prisma.user.findUnique({
@@ -80,33 +52,7 @@ export async function attachGoogle(userId, firebaseGoogleId) {
   return serialize({ message: 'Google account attached successfully' });
 }
 
-export async function requestResetPassword(phone) {
-  const user = await prisma.user.findUnique({ where: { phone } });
-
-  if (!user) throw new Error('User not found');
-
-  await fixedOtpProvider.sendOtp(phone);
-  return serialize({ message: 'OTP sent to phone' });
-}
-
-export async function verifyResetOtp(phone, otp) {
-  const user = await prisma.user.findUnique({ where: { phone } });
-
-  if (!user) throw new Error('User not found');
-
-  const isValid = await fixedOtpProvider.verifyOtp(phone, otp);
-  if (!isValid) throw new Error('Invalid OTP');
-
-  const otpToken = jwt.sign(
-    { phone, purpose: 'reset_password' },
-    process.env.JWT_SECRET,
-    { expiresIn: '10m' }
-  );
-  return serialize({ message: 'OTP verified successfully', otpToken });
-}
-
-export async function resetPassword(payload, newPassword) {
-  const { phone } = payload;
+export async function resetPassword(phone, newPassword) {
   
   const user = await prisma.user.findUnique({ where: { phone } });
   if (!user) throw new Error('User not found');
