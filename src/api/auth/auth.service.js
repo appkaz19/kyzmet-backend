@@ -5,6 +5,14 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export async function register(phone, password) {
+  if (!phone || typeof phone !== 'string') {
+    throw new Error('Phone is required');
+  }
+
+  if (!password || typeof password !== 'string') {
+    throw new Error('Password is required');
+  }
+
   const existingUser = await prisma.user.findFirst({
     where: { phone }
   });
