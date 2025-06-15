@@ -32,8 +32,8 @@ export async function getJobById(req, res) {
 
 export async function promoteJob(req, res) {
   try {
-    const { days } = req.body;
-    const result = await jobService.promoteJob(req.user.userId, req.params.id, days);
+    const { tariffId } = req.body;
+    const result = await jobService.promoteJob(req.user.userId, req.params.id, tariffId);
     res.json(result);
   } catch (error) {
     console.error('🔥 Promote Job error:', error);

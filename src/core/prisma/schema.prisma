@@ -157,6 +157,7 @@ model Service {
   price         Float
   address       String?
   promotedUntil DateTime?
+  expiresAt     DateTime
   createdAt     DateTime  @default(now())
   isDeleted     Boolean   @default(false)
 
@@ -194,6 +195,7 @@ model Job {
   price         Float     @default(0)
   address       String?
   createdAt     DateTime  @default(now())
+  expiresAt     DateTime
   promotedUntil DateTime?
   isDeleted     Boolean   @default(false)
 
@@ -312,6 +314,18 @@ model Transaction {
   walletId  String
 
   wallet Wallet @relation(fields: [walletId], references: [id])
+}
+
+model Tariff {
+  id            Int      @id @default(autoincrement())
+  name          String
+  price         Int
+  promoDays     Int      @default(0)
+  extraDays     Int      @default(0)
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 enum TransactionType {

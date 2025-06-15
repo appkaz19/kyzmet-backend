@@ -100,7 +100,7 @@
     tags:
       - jobs
     summary: Поднять задание в топ
-    description: Платное продвижение задания на 3 или 7 дней
+    description: Применить тариф продвижения задания
     security:
       - bearerAuth: []
     parameters:
@@ -116,11 +116,10 @@
           schema:
             type: object
             properties:
-              days:
+              tariffId:
                 type: integer
-                enum: [3, 7]
             required:
-              - days
+              - tariffId
     responses:
       '200':
         description: Задание продвинуто

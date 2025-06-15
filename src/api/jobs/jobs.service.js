@@ -27,7 +27,8 @@ export async function createJob(userId, data) {
       address,
       allowChat,
       allowPhone,
-      userId
+      userId,
+      expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
     }
   });
   return serialize(job);
@@ -35,7 +36,7 @@ export async function createJob(userId, data) {
 
 export async function getJobs(filters) {
   const { regionId, cityId, search, price } = filters;
-  const where = { isDeleted: false };
+  const where = { isDeleted: false, expiresAt: { gte: new Date() } };
 
   if (regionId) where.regionId = regionId;
   if (cityId) where.cityId = cityId;
@@ -80,20 +81,27 @@ export async function getJobById(id) {
   return serialize(job);
 }
 
-export async function promoteJob(userId, jobId, days) {
+export async function promoteJob(userId, jobId, tariffId) {
   const job = await prisma.job.findUnique({ where: { id: jobId } });
   if (!job) throw new Error('Job not found');
   if (job.userId !== userId) throw new Error('Unauthorized');
 
-  const cost = days === 7 ? 500 : 300;
-  await spendFromWallet(userId, cost);
+  const tariff = await prisma.tariff.findFirst({ where: { id: tariffId, isActive: true } });
+  if (!tariff) throw new Error('Tariff not found');
 
-  const promotedUntil = new Date();
-  promotedUntil.setDate(promotedUntil.getDate() + days);
+  if (tariff.price > 0) {
+    await spendFromWallet(userId, tariff.price);
+  }
 
-  await prisma.job.update({ where: { id: jobId }, data: { promotedUntil } });
+  let promotedUntil = job.promotedUntil && job.promotedUntil > new Date() ? new Date(job.promotedUntil) : new Date();
+  promotedUntil.setDate(promotedUntil.getDate() + tariff.promoDays);
 
-  return { message: `Job promoted for ${days} days.` };
+  const expiresAt = new Date(job.expiresAt);
+  expiresAt.setDate(expiresAt.getDate() + tariff.extraDays);
+
+  await prisma.job.update({ where: { id: jobId }, data: { promotedUntil, expiresAt } });
+
+  return { message: `Job promoted with tariff ${tariff.name}.` };
 }
 
 export async function buyEmployerContact(userId, jobId) {
