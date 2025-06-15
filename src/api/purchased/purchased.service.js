@@ -18,3 +18,15 @@ export async function getByUser(userId) {
     }
   });
 }
+
+export function getTariffs() {
+  return prisma.tariff.findMany({ orderBy: { order: 'asc' } });
+}
+
+export function createTariff(data) {
+  return prisma.tariff.create({ data });
+}
+
+export function updateTariff(id, data) {
+  return prisma.tariff.update({ where: { id: parseInt(id) }, data });
+}

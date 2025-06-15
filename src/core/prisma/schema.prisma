@@ -155,6 +155,7 @@ model Service {
 
   images String[] // Массив URL картинок
   videos String[] // Массив URL видео
+  expiresAt     DateTime
 
   userId        String
   regionId      String?
@@ -178,6 +179,7 @@ model Service {
   @@index([categoryId])
   @@index([subcategoryId])
   @@index([promotedUntil])
+  @@index([expiresAt])
 }
 
 model Job {
@@ -192,6 +194,7 @@ model Job {
 
   images String[] // Массив URL картинок
   videos String[] // Массив URL видео
+  expiresAt     DateTime
 
   userId   String
   regionId String?
@@ -206,6 +209,7 @@ model Job {
   @@index([cityId])
   @@index([userId])
   @@index([promotedUntil])
+  @@index([expiresAt])
 }
 
 model PurchasedContact {
@@ -315,4 +319,13 @@ model Notification {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+}
+
+model Tariff {
+  id          Int    @id @default(autoincrement())
+  name        String
+  price       Int
+  promoDays   Int
+  extraDays   Int
+  order       Int    @default(0)
 }

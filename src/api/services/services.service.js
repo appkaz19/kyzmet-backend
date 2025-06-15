@@ -8,10 +8,14 @@ export async function createService(userId, data) {
     regionId, cityId, categoryId, subcategoryId
   } = data;
 
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 14);
+
   const service = await prisma.service.create({
     data: {
       title, description, price, images, videos,
-      regionId, cityId, categoryId, subcategoryId, userId
+      regionId, cityId, categoryId, subcategoryId, userId,
+      expiresAt
     }
   });
 
@@ -55,7 +59,7 @@ export async function getServiceById(id, userId) {
 export async function getServices(filters = {}) {
   const { regionId, cityId, categoryId, subcategoryId, search, price } = filters;
 
-  const where = { isDeleted: false };
+  const where = { isDeleted: false, expiresAt: { gt: new Date() } };
 
   if (regionId) where.regionId = regionId;
   if (cityId) where.cityId = cityId;
@@ -117,20 +121,26 @@ export async function updateService(userId, serviceId, data) {
   return prisma.service.update({ where: { id: serviceId }, data: updateData });
 }
 
-export async function promoteService(userId, serviceId, days) {
+export async function promoteService(userId, serviceId, tariffId) {
   const service = await prisma.service.findUnique({ where: { id: serviceId } });
   if (!service) throw new Error('Service not found');
   if (service.userId !== userId) throw new Error('Unauthorized');
 
-  const cost = days === 7 ? 500 : 300;
-  await spendFromWallet(userId, cost);
+  const tariff = await prisma.tariff.findUnique({ where: { id: tariffId } });
+  if (!tariff) throw new Error('Tariff not found');
 
-  const promotedUntil = new Date();
-  promotedUntil.setDate(promotedUntil.getDate() + (days === 7 ? 7 : 3));
+  if (tariff.price > 0) await spendFromWallet(userId, tariff.price);
 
-  await prisma.service.update({ where: { id: serviceId }, data: { promotedUntil } });
+  const now = new Date();
+  let promotedUntil = service.promotedUntil && service.promotedUntil > now ? service.promotedUntil : now;
+  promotedUntil.setDate(promotedUntil.getDate() + tariff.promoDays);
 
-  return { message: `Service promoted for ${days} days.` };
+  let expiresAt = service.expiresAt && service.expiresAt > now ? service.expiresAt : now;
+  expiresAt.setDate(expiresAt.getDate() + tariff.extraDays);
+
+  await prisma.service.update({ where: { id: serviceId }, data: { promotedUntil, expiresAt } });
+
+  return { message: `Service promoted with tariff ${tariffId}.` };
 }
 
 export async function buyProviderContact(userId, serviceId) {
