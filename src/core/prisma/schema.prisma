@@ -186,6 +186,7 @@ model Service {
   @@index([categoryId])
   @@index([subcategoryId])
   @@index([promotedUntil])
+  @@index([expiresAt])
 }
 
 model Job {
@@ -195,7 +196,7 @@ model Job {
   price         Float     @default(0)
   address       String?
   createdAt     DateTime  @default(now())
-  expiresAt     DateTime
+  expiresAt     DateTime?
   promotedUntil DateTime?
   isDeleted     Boolean   @default(false)
 
@@ -219,6 +220,7 @@ model Job {
   @@index([cityId])
   @@index([userId])
   @@index([promotedUntil])
+  @@index([expiresAt])
 }
 
 model PurchasedContact {
