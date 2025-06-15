@@ -4,14 +4,17 @@ import { authMiddleware } from '../../middleware/authMiddleware.js';
 
 const router = Router();
 
+// Fetch all services (with optional filters)
+router.get('/', serviceController.getServices);
+
 // Create a new service
 router.post('/', authMiddleware, serviceController.createService);
 
+// Get current user's services
+router.get('/my', authMiddleware, serviceController.getMyServices);
+
 // Get service details by ID
 router.get('/:id', authMiddleware, serviceController.getServiceById);
-
-// Fetch all services (with optional filters)
-router.get('/', serviceController.getServices);
 
 // Update user's own service
 router.patch('/:id', authMiddleware, serviceController.updateService);
@@ -21,8 +24,5 @@ router.post('/:id/promote', authMiddleware, serviceController.promoteService);
 
 // Buy provider contact
 router.post('/:id/contact', authMiddleware, serviceController.buyProviderContact);
-
-// Get current user's services
-router.get('/my', authMiddleware, serviceController.getMyServices);
 
 export default router;

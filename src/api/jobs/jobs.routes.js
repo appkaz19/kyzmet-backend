@@ -4,11 +4,14 @@ import { authMiddleware } from '../../middleware/authMiddleware.js';
 
 const router = Router();
 
+// Получить список объявлений
+router.get('/', jobController.getJobs);
+
 // Создать объявление
 router.post('/', authMiddleware, jobController.createJob);
 
-// Получить список объявлений
-router.get('/', jobController.getJobs);
+// Получить свои объявления
+router.get('/my', authMiddleware, jobController.getMyJobs);
 
 // Получить объявление по ID
 router.get('/:id', jobController.getJobById);
@@ -18,8 +21,5 @@ router.post('/:id/promote', authMiddleware, jobController.promoteJob);
 
 // Купить контакт нанимателя
 router.post('/:id/contact', authMiddleware, jobController.buyEmployerContact);
-
-// Получить свои объявления
-router.get('/my', authMiddleware, jobController.getMyJobs);
 
 export default router;
