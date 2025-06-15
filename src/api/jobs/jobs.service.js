@@ -8,18 +8,22 @@ export async function createJob(userId, data) {
       regionId, cityId, address
     } = data;
 
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 14);
+
   return prisma.job.create({
     data: {
       title, description, price,
       images, videos, regionId,
-      cityId, address, userId
+      cityId, address, userId,
+      expiresAt
     }
   });
 }
 
 export async function getJobs(filters) {
   const { regionId, cityId, search, price } = filters;
-  const where = { isDeleted: false };
+  const where = { isDeleted: false, expiresAt: { gt: new Date() } };
 
   if (regionId) where.regionId = regionId;
   if (cityId) where.cityId = cityId;
@@ -65,20 +69,26 @@ export async function getJobById(id) {
   return job;
 }
 
-export async function promoteJob(userId, jobId, days) {
+export async function promoteJob(userId, jobId, tariffId) {
   const job = await prisma.job.findUnique({ where: { id: jobId } });
   if (!job) throw new Error('Job not found');
   if (job.userId !== userId) throw new Error('Unauthorized');
 
-  const cost = days === 7 ? 500 : 300;
-  await spendFromWallet(userId, cost);
+  const tariff = await prisma.tariff.findUnique({ where: { id: tariffId } });
+  if (!tariff) throw new Error('Tariff not found');
 
-  const promotedUntil = new Date();
-  promotedUntil.setDate(promotedUntil.getDate() + days);
+  if (tariff.price > 0) await spendFromWallet(userId, tariff.price);
 
-  await prisma.job.update({ where: { id: jobId }, data: { promotedUntil } });
+  const now = new Date();
+  let promotedUntil = job.promotedUntil && job.promotedUntil > now ? job.promotedUntil : now;
+  promotedUntil.setDate(promotedUntil.getDate() + tariff.promoDays);
 
-  return { message: `Job promoted for ${days} days.` };
+  let expiresAt = job.expiresAt && job.expiresAt > now ? job.expiresAt : now;
+  expiresAt.setDate(expiresAt.getDate() + tariff.extraDays);
+
+  await prisma.job.update({ where: { id: jobId }, data: { promotedUntil, expiresAt } });
+
+  return { message: `Job promoted with tariff ${tariffId}.` };
 }
 
 export async function buyEmployerContact(userId, jobId) {

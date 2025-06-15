@@ -92,7 +92,7 @@
     tags:
       - services
     summary: Поднять услугу в топ
-    description: Платное продвижение услуги на 3 или 7 дней
+    description: Продвижение услуги по выбранному тарифу
     security:
       - BearerAuth: []
     parameters:
@@ -108,10 +108,10 @@
           schema:
             type: object
             properties:
-              days:
+              tariffId:
                 type: integer
             required:
-              - days
+              - tariffId
     responses:
       '200':
         description: Услуга продвинута

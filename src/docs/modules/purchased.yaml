@@ -13,3 +13,94 @@
         description: Неавторизованный доступ
       '500':
         description: Ошибка сервера
+
+/purchased/tariffs:
+  get:
+    tags:
+      - purchased
+    summary: Список тарифов на продвижение
+    description: Возвращает доступные тарифы
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Список тарифов
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
+  post:
+    tags:
+      - purchased
+    summary: Создать тариф
+    description: Добавляет новый тариф (только для администраторов)
+    security:
+      - adminBearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              price:
+                type: integer
+              promoDays:
+                type: integer
+              extraDays:
+                type: integer
+              order:
+                type: integer
+            required:
+              - name
+              - price
+              - promoDays
+              - extraDays
+    responses:
+      '200':
+        description: Тариф создан
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
+
+/purchased/tariffs/{id}:
+  patch:
+    tags:
+      - purchased
+    summary: Обновить тариф
+    description: Редактирование существующего тарифа (только для администраторов)
+    security:
+      - adminBearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              price:
+                type: integer
+              promoDays:
+                type: integer
+              extraDays:
+                type: integer
+              order:
+                type: integer
+    responses:
+      '200':
+        description: Тариф обновлён
+      '401':
+        description: Неавторизованный доступ
+      '500':
+        description: Ошибка сервера
