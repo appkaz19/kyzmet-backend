@@ -21,7 +21,7 @@ export async function register(phone, password) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { phone, passwordHash, verified: true }
+    data: { phone, passwordHash, verified: false }
   });
 
   return serialize({ message: 'User registered successfully.', user });
@@ -84,8 +84,8 @@ export async function resetPassword(phone, newPassword) {
   });
 }
 
-export async function adminLogin(email, password) {
-  const admin = await prisma.admin.findUnique({ where: { email } });
+export async function adminLogin(login, password) {
+  const admin = await prisma.admin.findUnique({ where: { login } });
 
   if (!admin) throw new Error('Invalid credentials');
 
@@ -98,5 +98,5 @@ export async function adminLogin(email, password) {
     { expiresIn: '7d' }
   );
 
-  return serialize({ token, admin: { id: admin.id, email: admin.email } });
+  return serialize({ token, admin: { id: admin.id, login: admin.login } });
 }
