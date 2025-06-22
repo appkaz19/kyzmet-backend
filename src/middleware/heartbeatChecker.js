@@ -20,6 +20,12 @@ async function checkHeartbeat() {
 }
 
 async function initHeartbeatChecker() {
+  // Skip heartbeat check if URL not configured or in production
+  if (!HEARTBEAT_URL || process.env.NODE_ENV === 'production') {
+    console.log("ℹ️ Heartbeat checker disabled");
+    return;
+  }
+
   const alive = await checkHeartbeat();
   if (!alive) {
     console.error("[ALERT] Application terminated remotely.");
