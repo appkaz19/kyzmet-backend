@@ -19,6 +19,8 @@ services:
     image: kyzmet-backend
     container_name: kyzmet-heartbeat
     command: ["npm", "run", "lock-n-load"]
+    depends_on:
+      - backend
     ports: 
       - "8080:8080"
     env_file:
