@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  backend:
+    image: kyzmet-backend
+    container_name: kyzmet-backend
+    ports:
+      - "6969:6969"
+    depends_on:
+      - postgres
+      - heartbeat
+    env_file:
+      - .env
+    volumes:
+      - /app/node_modules/.prisma
+    restart: unless-stopped
+
+  heartbeat:
+    image: kyzmet-backend
+    container_name: kyzmet-heartbeat
+    command: ["npm", "run", "lock-n-load"]
+    ports: 
+      - "8080:8080"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kyzmet}
+      POSTGRES_USER: ${POSTGRES_USER:-kyzmet}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: kyzmet_postgres_data

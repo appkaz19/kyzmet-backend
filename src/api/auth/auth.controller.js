@@ -1,6 +1,7 @@
 import * as authService from './auth.service.js';
 import * as passwordResetService from '../../core/auth/passwordResetService.js';
 import * as otpService from '../../core/otp/otpService.js';
+import * as firebaseOtpService from '../../core/otp/firebaseOtpService.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 
 export const register = asyncHandler(async (req, res) => {
@@ -77,4 +78,19 @@ export const verifyPhone = asyncHandler(async (req, res) => {
   const result = await otpService.verifyPhoneWithOTP(phone, otp);
   console.log('✅ [auth] Phone verified:', phone);
   res.json(result);
+});
+
+// Firebase OTP verification endpoints
+export const verifyFirebasePhone = asyncHandler(async (req, res) => {
+  const { idToken } = req.body;
+  const result = await firebaseOtpService.verifyPhoneWithFirebase(idToken);
+  console.log('✅ [auth] Phone verified via Firebase');
+  res.json(result);
+});
+
+export const registerWithFirebase = asyncHandler(async (req, res) => {
+  const { phone, password, idToken } = req.body;
+  const result = await firebaseOtpService.registerWithFirebaseVerification(phone, password, idToken);
+  console.log('✅ [auth] User registered via Firebase:', result.user.id);
+  res.status(201).json(result);
 });

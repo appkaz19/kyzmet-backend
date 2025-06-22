@@ -2,6 +2,12 @@
 // For production, consider using Redis for distributed rate limiting
 const rateLimitStore = new Map();
 
+// Clear all rate limits (for development)
+export function clearRateLimit() {
+  rateLimitStore.clear();
+  console.log('✅ [Rate Limit] All rate limits cleared');
+}
+
 // Clean up old entries every 10 minutes
 setInterval(() => {
   const now = Date.now();
@@ -14,6 +20,11 @@ setInterval(() => {
 
 function createRateLimit(maxRequests, windowMs, message) {
   return (req, res, next) => {
+    // Skip rate limiting in development
+    if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+      return next();
+    }
+    
     const key = req.ip || req.connection.remoteAddress;
     const now = Date.now();
     

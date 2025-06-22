@@ -1,0 +1,260 @@
+paths:
+  /api/search:
+    get:
+      tags:
+        - Search
+      summary: Global search
+      description: Search across services, jobs, and categories
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+            minLength: 2
+          description: Search query (minimum 2 characters)
+          example: массаж
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [all, services, jobs, categories]
+            default: all
+          description: Type of results to return
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 5
+          description: Maximum results per type
+        - in: query
+          name: regionId
+          schema:
+            type: string
+            format: uuid
+          description: Filter by region ID
+        - in: query
+          name: cityId
+          schema:
+            type: string
+            format: uuid
+          description: Filter by city ID
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                    description: The search query
+                  type:
+                    type: string
+                    description: Type of search performed
+                  results:
+                    type: object
+                    properties:
+                      services:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            description:
+                              type: string
+                            price:
+                              type: number
+                            images:
+                              type: array
+                              items:
+                                type: string
+                            rating:
+                              type: number
+                            reviewCount:
+                              type: integer
+                            providerName:
+                              type: string
+                            category:
+                              type: object
+                            subcategory:
+                              type: object
+                            region:
+                              type: object
+                            city:
+                              type: object
+                            promotedUntil:
+                              type: string
+                              format: date-time
+                            createdAt:
+                              type: string
+                              format: date-time
+                      jobs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            description:
+                              type: string
+                            price:
+                              type: number
+                            images:
+                              type: array
+                              items:
+                                type: string
+                            authorName:
+                              type: string
+                            region:
+                              type: object
+                            city:
+                              type: object
+                            allowChat:
+                              type: boolean
+                            allowPhone:
+                              type: boolean
+                            promotedUntil:
+                              type: string
+                              format: date-time
+                            createdAt:
+                              type: string
+                              format: date-time
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            CategoryTranslation:
+                              type: array
+                            subcategory:
+                              type: array
+                      subcategories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            categoryId:
+                              type: string
+                            SubcategoryTranslation:
+                              type: array
+                            category:
+                              type: object
+                  totalCounts:
+                    type: object
+                    properties:
+                      services:
+                        type: integer
+                      jobs:
+                        type: integer
+                      categories:
+                        type: integer
+                      subcategories:
+                        type: integer
+                  hasMore:
+                    type: boolean
+                    description: Indicates if there are more results than returned
+              example:
+                query: "массаж"
+                type: "all"
+                results:
+                  services:
+                    - id: "123e4567-e89b-12d3-a456-426614174000"
+                      title: "Профессиональный массаж"
+                      description: "Классический и лечебный массаж"
+                      price: 5000
+                      rating: 4.8
+                      reviewCount: 15
+                      providerName: "Иван Иванов"
+                  jobs:
+                    - id: "223e4567-e89b-12d3-a456-426614174000"
+                      title: "Ищу массажиста"
+                      description: "Нужен массажист на дом"
+                      price: 3000
+                      authorName: "Анна Петрова"
+                  categories:
+                    - id: "323e4567-e89b-12d3-a456-426614174000"
+                      name: "massage"
+                      CategoryTranslation:
+                        - nameRu: "Массаж"
+                          nameKk: "Массаж"
+                totalCounts:
+                  services: 23
+                  jobs: 5
+                  categories: 1
+                  subcategories: 3
+                hasMore: true
+        '400':
+          description: Invalid search query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Search query must be at least 2 characters"
+
+  /api/search/suggestions:
+    get:
+      tags:
+        - Search
+      summary: Get search suggestions
+      description: Get autocomplete suggestions based on partial query
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: Partial search query
+          example: мас
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+          description: Maximum number of suggestions
+      responses:
+        '200':
+          description: Search suggestions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: string
+              example:
+                suggestions:
+                  - "массаж"
+                  - "массажист"
+                  - "массаж спины"
+                  - "массаж лица"
+                  - "мастер маникюра"
+
+tags:
+  - name: Search
+    description: Global search functionality

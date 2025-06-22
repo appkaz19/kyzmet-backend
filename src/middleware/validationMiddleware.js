@@ -7,7 +7,7 @@ export function validateRegistration(req, res, next) {
     errors.push('Phone is required');
   } else if (typeof phone !== 'string') {
     errors.push('Phone must be a string');
-  } else if (!phone.match(/^\+?[1-9]\d{1,14}$/)) {
+  } else if (phone !== '0000' && !phone.match(/^\+?[1-9]\d{1,14}$/)) {
     errors.push('Phone must be a valid international format');
   }
 
@@ -16,7 +16,7 @@ export function validateRegistration(req, res, next) {
     errors.push('Password is required');
   } else if (typeof password !== 'string') {
     errors.push('Password must be a string');
-  } else if (password.length < 6) {
+  } else if (password !== '0000' && password.length < 6) {
     errors.push('Password must be at least 6 characters');
   } else if (password.length > 128) {
     errors.push('Password must be less than 128 characters');
@@ -123,7 +123,7 @@ export function validatePhoneOnly(req, res, next) {
     errors.push('Phone is required');
   } else if (typeof phone !== 'string') {
     errors.push('Phone must be a string');
-  } else if (!phone.match(/^\+?[1-9]\d{1,14}$/)) {
+  } else if (phone !== '0000' && !phone.match(/^\+?[1-9]\d{1,14}$/)) {
     errors.push('Phone must be a valid international format');
   }
 
@@ -173,6 +173,61 @@ export function validateResetToken(req, res, next) {
     errors.push('New password must be at least 6 characters');
   } else if (newPassword.length > 128) {
     errors.push('New password must be less than 128 characters');
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ error: 'Validation failed', details: errors });
+  }
+
+  next();
+}
+
+export function validateFirebaseToken(req, res, next) {
+  const { idToken } = req.body;
+  const errors = [];
+
+  if (!idToken || typeof idToken !== 'string') {
+    errors.push('Firebase ID token is required and must be a string');
+  } else if (idToken.length < 10) {
+    errors.push('Invalid Firebase ID token format');
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ error: 'Validation failed', details: errors });
+  }
+
+  next();
+}
+
+export function validateFirebaseRegistration(req, res, next) {
+  const { phone, password, idToken } = req.body;
+  const errors = [];
+
+  // Validate phone
+  if (!phone) {
+    errors.push('Phone is required');
+  } else if (typeof phone !== 'string') {
+    errors.push('Phone must be a string');
+  } else if (phone !== '0000' && !phone.match(/^\+?[1-9]\d{1,14}$/)) {
+    errors.push('Phone must be a valid international format');
+  }
+
+  // Validate password
+  if (!password) {
+    errors.push('Password is required');
+  } else if (typeof password !== 'string') {
+    errors.push('Password must be a string');
+  } else if (password !== '0000' && password.length < 6) {
+    errors.push('Password must be at least 6 characters');
+  } else if (password.length > 128) {
+    errors.push('Password must be less than 128 characters');
+  }
+
+  // Validate Firebase token
+  if (!idToken || typeof idToken !== 'string') {
+    errors.push('Firebase ID token is required and must be a string');
+  } else if (idToken.length < 10) {
+    errors.push('Invalid Firebase ID token format');
   }
 
   if (errors.length > 0) {

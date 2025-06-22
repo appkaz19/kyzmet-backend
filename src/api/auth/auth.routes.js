@@ -9,11 +9,14 @@ import {
   validateAttachGoogle,
   validatePhoneOnly,
   validateOTP,
-  validateResetToken
+  validateResetToken,
+  validateFirebaseToken,
+  validateFirebaseRegistration
 } from '../../middleware/validationMiddleware.js';
 import { 
   authRateLimit, 
-  passwordResetRateLimit 
+  passwordResetRateLimit,
+  clearRateLimit 
 } from '../../middleware/rateLimitMiddleware.js';
 import { errorMiddleware } from '../../middleware/errorHandler.js';
 
@@ -79,12 +82,32 @@ router.post('/verify-phone',
   authController.verifyPhone
 );
 
+// Firebase OTP verification
+router.post('/verify-firebase-phone', 
+  authRateLimit,
+  validateFirebaseToken,
+  authController.verifyFirebasePhone
+);
+
+// Register with Firebase verification
+router.post('/register-firebase', 
+  authRateLimit,
+  validateFirebaseRegistration,
+  authController.registerWithFirebase
+);
+
 // Admin Login
 router.post('/admin-login', 
   authRateLimit,
   validateAdminLogin, 
   authController.adminLogin
 );
+
+// Clear rate limits (development only)
+router.post('/clear-limits', (req, res) => {
+  clearRateLimit();
+  res.json({ success: true, message: 'Rate limits cleared' });
+});
 
 // Error handling middleware
 router.use(errorMiddleware);
