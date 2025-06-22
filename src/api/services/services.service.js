@@ -160,7 +160,8 @@ export async function buyProviderContact(userId, serviceId) {
   const alreadyPurchased = await prisma.purchasedContact.findFirst({ where: { userId, serviceId } });
 
   if (!alreadyPurchased) {
-    await spendFromWallet(userId, 100);
+    // TODO: Временно отключено списание - контакты бесплатно
+    // await spendFromWallet(userId, 100);
     await prisma.purchasedContact.create({ data: { userId, serviceId } });
   }
 
