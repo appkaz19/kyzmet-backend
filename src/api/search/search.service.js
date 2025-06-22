@@ -45,9 +45,8 @@ export async function globalSearch({
         user: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
-            profilePhoto: true
+            fullName: true,
+            photo: true
           }
         },
         category: {
@@ -86,7 +85,7 @@ export async function globalSearch({
           ...service,
           rating: avgRating,
           reviewCount: reviews.length,
-          providerName: `${service.user.firstName || ''} ${service.user.lastName || ''}`.trim()
+          providerName: service.user.fullName || 'Аноним'
         };
       })
     );
@@ -110,8 +109,7 @@ export async function globalSearch({
         user: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true
+            fullName: true
           }
         },
         region: true,
@@ -126,9 +124,7 @@ export async function globalSearch({
 
     results.jobs = jobs.map(job => ({
       ...job,
-      authorName: job.user ? 
-        `${job.user.firstName || ''} ${job.user.lastName || ''}`.trim() || 'Аноним' : 
-        'Аноним'
+      authorName: job.user?.fullName || 'Аноним'
     }));
   }
 
